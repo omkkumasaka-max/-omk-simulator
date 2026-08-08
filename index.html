@@ -568,8 +568,7 @@ function makeProposalCanvases(){
     drawText(ctx,'シミュレーション条件',90,165,38,'900','#17252b');
     drawText(ctx,'今回の試算に使用した主な前提条件です。',90,205,19,'500','#68787d');
 
-    const condText=document.getElementById('conditions').innerText.split('
-').filter(Boolean);
+    const condText=document.getElementById('conditions').innerText.split('\n').filter(Boolean);
     roundedRect(ctx,90,250,900,650,24,'#ffffff','#dde6e4');
     drawText(ctx,'試算条件',120,300,23,'800','#33464a');
     condText.forEach((t,i)=>{
