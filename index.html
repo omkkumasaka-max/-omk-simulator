@@ -152,7 +152,6 @@
           <h3>蓄電池</h3>
           <div class="row">
             <div><label>蓄電池容量（kWh）</label><input id="batteryKwh" type="number" step="0.1" value="12.7"></div>
-            <div><label>充放電総合効率（%）</label><input id="batteryEff" type="number" step="1" value="90"></div>
           </div>
         </div>
         <div id="eqBox" class="hidden">
@@ -208,6 +207,7 @@
             <tr><td>蓄電池経由の自家消費量</td><td id="batteryUse">-</td></tr>
             <tr><td>エコキュート昼間活用量</td><td id="eqUse">-</td></tr>
             <tr><td>年間売電量</td><td id="sellKwh">-</td></tr>
+            <tr><td>推定自家消費率</td><td id="selfConsumptionRate">-</td></tr>
           </tbody>
         </table>
         <h3>長期試算</h3>
@@ -362,8 +362,8 @@ function calcYear(year, base){
    const cap=get('batteryKwh')*0.90;
    const annualChargeCap=cap*330;
    const nightNeed=Math.max(0,base.annualUse-direct-eq);
-   const charge=Math.min(surplus,annualChargeCap, nightNeed/(get('batteryEff')/100 || 1));
-   battDelivered=charge*(get('batteryEff')/100);
+   const charge=Math.min(surplus,annualChargeCap, nightNeed/BATTERY_ROUNDTRIP_EFF);
+   battDelivered=charge*BATTERY_ROUNDTRIP_EFF;
    surplus-=charge;
  }
  const sell= Math.max(0,surplus);
@@ -391,6 +391,7 @@ function calculate(){
  }
  const base={p,annualBill,annualUse,gen,sellUnit,currentSellIncome,buyUnit,dayShare:dayShare(),rise:get('priceRise')/100,useDegrade:document.getElementById('useDegrade').checked,degrade:get('degrade')/100};
  const y1=calcYear(1,base);
+ const selfConsumptionRate=y1.gen>0?Math.min(100,Math.max(0,(y1.direct+y1.battDelivered+y1.eq)/y1.gen*100)):0;
  const price=Math.max(0,get('price')-get('subsidy'));
  const pay=y1.benefit>0?price/y1.benefit:0;
  document.getElementById('annualBenefit').textContent=yen(y1.benefit)+'/年';
@@ -404,6 +405,7 @@ function calculate(){
  document.getElementById('batteryUse').textContent=kwh(y1.battDelivered);
  document.getElementById('eqUse').textContent=kwh(y1.eq);
  document.getElementById('sellKwh').textContent=kwh(y1.sell);
+ document.getElementById('selfConsumptionRate').textContent=selfConsumptionRate.toFixed(1)+'%';
  let cum=0,rows='';
  for(let y=1;y<=20;y++){
    const r=calcYear(y,base); cum+=r.benefit;
@@ -413,7 +415,7 @@ function calculate(){
  const patNames={1:'太陽光のみ',2:'太陽光＋蓄電池',3:'太陽光＋蓄電池＋エコキュート昼間沸き上げ',4:'既設太陽光＋蓄電池',5:'既設太陽光＋蓄電池＋エコキュート交換'};
  const cond=[`導入パターン：${patNames[p]}`,`世帯人数：${get('family')}人`,`昼間在宅人数：${get('dayPeople')}人`,`夏場電気代：${yen(get('summerBill'))}/月`,`冬場電気代：${yen(get('winterBill'))}/月`,`買電単価：${get('buyUnit')}円/kWh`,`実質導入費：${yen(price)}`];
  if(p<4) cond.push(`年間予測発電量：${kwh(get('annualGen'))}`); else cond.push(`年間売電金額：${yen(get('annualSellYen'))}`,`売電単価：約${get('sellUnitExisting')}円/kWh`);
- if([2,3,4,5].includes(p)) cond.push(`蓄電池容量：${get('batteryKwh')}kWh`,`充放電総合効率：${get('batteryEff')}%`);
+ if([2,3,4,5].includes(p)) cond.push(`蓄電池容量：${get('batteryKwh')}kWh`);
  if([3,5].includes(p)) cond.push(`エコキュート昼間移行率：${get('eqShift')}%`);
  cond.push(`太陽光経年劣化：${base.useDegrade?get('degrade')+'%/年':'考慮しない'}`,`電気料金上昇率：${get('priceRise')}%/年`);
  document.getElementById('conditions').innerHTML=cond.join('<br>');
@@ -494,6 +496,7 @@ function makeProposalCanvases(){
   const afterBill=document.getElementById('afterBill').textContent;
   const sellIncome=document.getElementById('sellIncome').textContent;
   const payback=document.getElementById('payback').textContent;
+  const selfRate=document.getElementById('selfConsumptionRate').textContent;
 
   // Page 1
   {
@@ -536,8 +539,9 @@ function makeProposalCanvases(){
       ['蓄電池経由の自家消費量',document.getElementById('batteryUse').textContent],
       ['エコキュート昼間活用量',document.getElementById('eqUse').textContent],
       ['年間売電量',document.getElementById('sellKwh').textContent],
+      ['推定自家消費率',selfRate],
     ];
-    rows.forEach((r,i)=>tableRow(ctx,120,330+i*72,620,r[0],r[1],i%2===0));
+    rows.forEach((r,i)=>tableRow(ctx,120,330+i*61,620,r[0],r[1],i%2===0));
 
     roundedRect(ctx,810,250,700,610,24,'#ffffff','#dde6e4');
     drawText(ctx,'長期の累積経済効果',840,300,23,'800','#33464a');
