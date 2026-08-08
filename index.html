@@ -259,10 +259,11 @@ function calculate(){
 function resetForm(){ location.reload(); }
 function printProposal(){
   calculate();
-  setTimeout(()=>{
-    try{ window.print(); }
-    catch(e){ alert('印刷画面を開けませんでした。ブラウザの共有メニューから「プリント」→「PDFとして保存」を選んでください。'); }
-  },120);
+  try{
+    window.print();
+  }catch(e){
+    alert('印刷画面を開けませんでした。Safariの共有ボタンから「プリント」を選び、印刷プレビューをピンチアウトしてPDFとして保存してください。');
+  }
 }
 window.addEventListener('DOMContentLoaded',()=>{
   const st=document.getElementById('jsStatus'); if(st) st.textContent='JavaScript動作中';
