@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>OMK 太陽光・蓄電池 導入効果シミュレーター</title>
+<style>
+  :root{
+    --bg:#f6f8fb; --card:#fff; --text:#172033; --muted:#667085; --line:#e5e7eb;
+    --brand:#0f766e; --brand2:#14b8a6; --warn:#b45309; --good:#166534;
+  }
+  *{box-sizing:border-box} body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;background:var(--bg);color:var(--text)}
+  .wrap{max-width:1180px;margin:auto;padding:24px}.hero{background:linear-gradient(135deg,#0f766e,#115e59);color:#fff;padding:28px;border-radius:22px;margin-bottom:20px}
+  .hero h1{margin:0 0 6px;font-size:28px}.hero p{margin:0;opacity:.9}.grid{display:grid;grid-template-columns:1.08fr .92fr;gap:20px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px;box-shadow:0 8px 30px rgba(15,23,42,.05);margin-bottom:18px}
+  h2{font-size:18px;margin:0 0 16px} h3{font-size:15px;margin:18px 0 10px;color:#344054}.row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.row3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+  label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px} input,select{width:100%;padding:11px 12px;border:1px solid #d0d5dd;border-radius:10px;background:#fff;font-size:14px}.hint{font-size:11px;color:var(--muted);margin-top:5px}
+  .patterns{display:grid;grid-template-columns:1fr;gap:8px}.pat{display:flex;align-items:flex-start;gap:10px;padding:12px;border:1px solid var(--line);border-radius:12px;cursor:pointer}.pat input{width:auto;margin-top:3px}.pat strong{display:block;font-size:14px}.pat span{font-size:12px;color:var(--muted)}
+  .btns{display:flex;gap:10px;flex-wrap:wrap}.btn{border:0;border-radius:12px;padding:12px 18px;font-weight:700;cursor:pointer}.primary{background:var(--brand);color:#fff}.secondary{background:#eef2f6;color:#24324a}.outline{background:#fff;border:1px solid var(--line)}
+  .metrics{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.metric{padding:14px;border-radius:14px;background:#f8fafc;border:1px solid var(--line)}.metric b{display:block;font-size:22px;margin-top:4px}.metric small{color:var(--muted)}
+  .big{padding:18px;border-radius:16px;background:#ecfdf5;border:1px solid #bbf7d0;margin:12px 0}.big .num{font-size:34px;font-weight:800;color:var(--good)}
+  table{width:100%;border-collapse:collapse;font-size:13px} th,td{padding:9px;border-bottom:1px solid var(--line);text-align:right} th:first-child,td:first-child{text-align:left}.note{font-size:11px;color:var(--muted);line-height:1.65}
+  .hidden{display:none!important}.checkline{display:flex;align-items:center;gap:8px;margin:10px 0}.checkline input{width:auto}.section-title{padding-top:4px;border-top:1px dashed var(--line);margin-top:18px}
+  .print-head{display:none}
+  @media(max-width:850px){.grid{grid-template-columns:1fr}.row,.row3{grid-template-columns:1fr}.metrics{grid-template-columns:1fr}}
+  @media print{
+    body{background:#fff}.no-print,.hero,.input-pane{display:none!important}.wrap{max-width:none;padding:0}.grid{display:block}.result-pane{display:block}.card{box-shadow:none;border:0;border-radius:0;padding:12mm;margin:0}.print-head{display:block;border-bottom:2px solid #111;padding-bottom:8px;margin-bottom:16px}.print-head h1{font-size:20px;margin:0}.print-head p{font-size:11px;color:#555}.metric{break-inside:avoid}.note{font-size:9px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <h1>OMK 太陽光・蓄電池 導入効果シミュレーター</h1>
+    <p>社内用・簡易提案シミュレーション Ver.1</p>
+  </div>
+  <div class="grid">
+    <div class="input-pane">
+      <div class="card">
+        <h2>1. お客様情報</h2>
+        <div class="row">
+          <div><label>お客様名</label><input id="name" placeholder="例：熊坂 様"></div>
+          <div><label>担当者</label><input id="staff" placeholder="例：熊坂"></div>
+          <div><label>エネルギー種別</label><select id="energy"><option value="all">オール電化</option><option value="gas">ガス併用</option></select></div>
+          <div><label>世帯人数</label><input id="family" type="number" min="1" value="4"></div>
+          <div><label>昼間在宅人数</label><input id="dayPeople" type="number" min="0" value="1"></div>
+          <div><label>ガス代（月平均・任意）</label><input id="gasBill" type="number" min="0" value="0"></div>
+          <div><label>夏場の電気代（月）</label><input id="summerBill" type="number" min="0" value="18000"></div>
+          <div><label>冬場の電気代（月）</label><input id="winterBill" type="number" min="0" value="35000"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>2. 導入パターン</h2>
+        <div class="patterns">
+          <label class="pat"><input type="radio" name="pattern" value="1" checked><div><strong>① 太陽光のみ</strong><span>新規太陽光を設置</span></div></label>
+          <label class="pat"><input type="radio" name="pattern" value="2"><div><strong>② 太陽光＋蓄電池</strong><span>新規太陽光と蓄電池を同時導入</span></div></label>
+          <label class="pat"><input type="radio" name="pattern" value="3"><div><strong>③ 太陽光＋蓄電池＋エコキュート昼間沸き上げ</strong><span>太陽光余剰を給湯にも活用</span></div></label>
+          <label class="pat"><input type="radio" name="pattern" value="4"><div><strong>④ 既設太陽光＋蓄電池</strong><span>現在の売電を蓄電・自家消費へ</span></div></label>
+          <label class="pat"><input type="radio" name="pattern" value="5"><div><strong>⑤ 既設太陽光＋蓄電池＋エコキュート交換</strong><span>売電の一部を蓄電・昼間給湯へ</span></div></label>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>3. 設備・価格情報</h2>
+        <div id="newSolarBox">
+          <h3>新規太陽光</h3>
+          <div class="row">
+            <div><label>太陽光容量（kW）</label><input id="solarKw" type="number" step="0.1" value="6.0"></div>
+            <div><label>年間予測発電量（kWh）</label><input id="annualGen" type="number" value="6500"></div>
+          </div>
+        </div>
+        <div id="existingSolarBox" class="hidden">
+          <h3>既設太陽光</h3>
+          <div class="row3">
+            <div><label>既設容量（kW・任意）</label><input id="existKw" type="number" step="0.1" value="5.0"></div>
+            <div><label>年間売電金額（円）</label><input id="annualSellYen" type="number" value="120000"></div>
+            <div><label>売電単価（円/kWh）</label><input id="sellUnitExisting" type="number" step="0.1" value="16"></div>
+          </div>
+        </div>
+        <div id="batteryBox" class="hidden">
+          <h3>蓄電池</h3>
+          <div class="row">
+            <div><label>蓄電池容量（kWh）</label><input id="batteryKwh" type="number" step="0.1" value="12.7"></div>
+            <div><label>充放電総合効率（%）</label><input id="batteryEff" type="number" step="1" value="90"></div>
+          </div>
+        </div>
+        <div id="eqBox" class="hidden">
+          <h3>エコキュート</h3>
+          <div class="row">
+            <div><label>タンク容量</label><select id="eqTank"><option value="370">370L</option><option value="460" selected>460L</option></select></div>
+            <div><label>昼間移行率（%）</label><input id="eqShift" type="number" value="75"></div>
+          </div>
+        </div>
+        <h3 class="section-title">価格</h3>
+        <div class="row">
+          <div><label>設備・工事価格（税込・円）</label><input id="price" type="number" value="2500000"></div>
+          <div><label>補助金（円）</label><input id="subsidy" type="number" value="500000"></div>
+          <div><label>買電単価（円/kWh）</label><input id="buyUnit" type="number" step="0.1" value="35"></div>
+          <div><label>新規太陽光の売電単価（円/kWh）</label><input id="sellUnitNew" type="number" step="0.1" value="15"></div>
+        </div>
+        <h3 class="section-title">詳細設定（任意）</h3>
+        <div class="checkline"><input id="useDegrade" type="checkbox"><label for="useDegrade" style="margin:0">太陽光パネルの経年劣化を考慮する</label></div>
+        <div class="row">
+          <div><label>年間劣化率（%）</label><input id="degrade" type="number" step="0.01" value="0.3" disabled></div>
+          <div><label>電気料金上昇率（%/年）</label><input id="priceRise" type="number" step="0.1" value="0"></div>
+        </div>
+        <div class="hint">初期計算では太陽光劣化率0%、電気料金上昇率0%として使用できます。</div>
+      </div>
+
+      <div class="card no-print">
+        <div class="btns">
+          <button type="button" id="calcBtn" class="btn primary" onclick="calculate(); return false;">シミュレーション実行</button>
+          <button type="button" id="pdfBtn" class="btn secondary" onclick="printProposal(); return false;">提案書PDF出力</button>
+          <button type="button" id="resetBtn" class="btn outline" onclick="resetForm(); return false;">初期値に戻す</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="result-pane">
+      <div class="card" id="resultCard">
+        <div class="print-head"><h1>OMK 導入効果シミュレーション</h1><p id="printMeta"></p></div>
+        <h2>シミュレーション結果</h2>
+        <div class="big"><small>年間経済効果（概算）</small><div class="num" id="annualBenefit">-</div></div>
+        <div class="metrics">
+          <div class="metric"><small>現在の年間電気代 推計</small><b id="annualBill">-</b></div>
+          <div class="metric"><small>導入後の年間買電費 推計</small><b id="afterBill">-</b></div>
+          <div class="metric"><small>年間売電収入 推計</small><b id="sellIncome">-</b></div>
+          <div class="metric"><small>投資回収目安</small><b id="payback">-</b></div>
+        </div>
+        <h3>エネルギー内訳</h3>
+        <table>
+          <tbody>
+            <tr><td>年間電力使用量 推計</td><td id="annualUse">-</td></tr>
+            <tr><td>太陽光年間発電量</td><td id="genOut">-</td></tr>
+            <tr><td>直接自家消費量</td><td id="directUse">-</td></tr>
+            <tr><td>蓄電池経由の自家消費量</td><td id="batteryUse">-</td></tr>
+            <tr><td>エコキュート昼間活用量</td><td id="eqUse">-</td></tr>
+            <tr><td>年間売電量</td><td id="sellKwh">-</td></tr>
+          </tbody>
+        </table>
+        <h3>長期試算</h3>
+        <table><thead><tr><th>期間</th><th>累積経済効果</th><th>実質導入費との差</th></tr></thead><tbody id="longRows"></tbody></table>
+        <h3>計算条件</h3>
+        <div class="note" id="conditions"></div>
+        <p class="note" style="margin-top:14px">※本シミュレーションは、お客様から提供された情報および標準的な想定条件に基づく概算です。実際の発電量、使用量、売電収入、電気料金、削減効果等を保証するものではありません。正式提案時は機器仕様、電力契約、設置条件等をご確認ください。</p>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+const yen=n=>Math.round(n).toLocaleString('ja-JP')+'円';
+const kwh=n=>Math.round(n).toLocaleString('ja-JP')+' kWh';
+const get=id=>Number(document.getElementById(id).value)||0;
+function currentPattern(){return Number(document.querySelector('input[name=pattern]:checked').value)}
+function updateBoxes(){
+ const p=currentPattern();
+ document.getElementById('newSolarBox').classList.toggle('hidden',p>=4);
+ document.getElementById('existingSolarBox').classList.toggle('hidden',p<4);
+ document.getElementById('batteryBox').classList.toggle('hidden',![2,3,4,5].includes(p));
+ document.getElementById('eqBox').classList.toggle('hidden',![3,5].includes(p));
+}
+
+function estimateAnnualBill(){
+ const s=get('summerBill'), w=get('winterBill');
+ // 春秋は夏冬の中間よりやや低めとして推計：夏3か月、冬4か月、中間5か月
+ const mid=((s+w)/2)*0.82;
+ return s*3+w*4+mid*5;
+}
+function estimateAnnualUse(annualBill,buyUnit){
+ // 基本料金等を考慮し、電力量料金相当を年間請求の85%と仮定
+ return buyUnit>0 ? annualBill*0.85/buyUnit : 0;
+}
+function dayShare(){
+ const family=Math.max(1,get('family')), day=get('dayPeople');
+ let share=0.23 + Math.min(day/family,1)*0.20;
+ if(document.getElementById('energy').value==='all') share+=0.02;
+ return Math.min(0.48,share);
+}
+function eqAnnualUse(){
+ const family=Math.max(1,get('family'));
+ // 簡易標準値。世帯人数に応じて年間の給湯電力量を推計
+ return 520 + family*180;
+}
+function calcYear(year, base){
+ const rise=Math.pow(1+base.rise,year-1);
+ const degrade=base.useDegrade?Math.pow(1-base.degrade,year-1):1;
+ let gen=base.gen*degrade;
+ let direct=Math.min(gen,base.annualUse*base.dayShare*0.85);
+ let surplus=Math.max(0,gen-direct);
+ let eq=0,battDelivered=0;
+ if([3,5].includes(base.p)){
+   const eqNeed=eqAnnualUse()*(get('eqShift')/100);
+   eq=Math.min(surplus,eqNeed);
+   surplus-=eq;
+ }
+ if([2,3,4,5].includes(base.p)){
+   const cap=get('batteryKwh')*0.90;
+   const annualChargeCap=cap*330;
+   const nightNeed=Math.max(0,base.annualUse-direct-eq);
+   const charge=Math.min(surplus,annualChargeCap, nightNeed/(get('batteryEff')/100 || 1));
+   battDelivered=charge*(get('batteryEff')/100);
+   surplus-=charge;
+ }
+ const sell= Math.max(0,surplus);
+ const bought=Math.max(0,base.annualUse-direct-eq-battDelivered);
+ const afterBuy=bought*base.buyUnit*rise;
+ const sellIncome=sell*base.sellUnit;
+ const currentSellIncome=base.currentSellIncome;
+ const currentCost=base.annualBill*rise - currentSellIncome;
+ const afterNet=afterBuy-sellIncome;
+ const benefit=currentCost-afterNet;
+ return {gen,direct,eq,battDelivered,sell,bought,afterBuy,sellIncome,benefit};
+}
+function calculate(){
+ const p=currentPattern();
+ const annualBill=estimateAnnualBill();
+ const buyUnit=get('buyUnit');
+ const annualUse=estimateAnnualUse(annualBill,buyUnit);
+ let gen=0,sellUnit=0,currentSellIncome=0;
+ if(p<4){ gen=get('annualGen'); sellUnit=get('sellUnitNew'); }
+ else {
+   currentSellIncome=get('annualSellYen'); sellUnit=get('sellUnitExisting');
+   const currentSellKwh=sellUnit>0?currentSellIncome/sellUnit:0;
+   // 既設では、現在の売電量＋推定直接自家消費を年間発電量の近似として使用
+   gen=currentSellKwh + annualUse*dayShare()*0.85;
+ }
+ const base={p,annualBill,annualUse,gen,sellUnit,currentSellIncome,buyUnit,dayShare:dayShare(),rise:get('priceRise')/100,useDegrade:document.getElementById('useDegrade').checked,degrade:get('degrade')/100};
+ const y1=calcYear(1,base);
+ const price=Math.max(0,get('price')-get('subsidy'));
+ const pay=y1.benefit>0?price/y1.benefit:0;
+ document.getElementById('annualBenefit').textContent=yen(y1.benefit)+'/年';
+ document.getElementById('annualBill').textContent=yen(annualBill);
+ document.getElementById('afterBill').textContent=yen(y1.afterBuy);
+ document.getElementById('sellIncome').textContent=yen(y1.sellIncome);
+ document.getElementById('payback').textContent=pay>0?pay.toFixed(1)+'年':'算出不可';
+ document.getElementById('annualUse').textContent=kwh(annualUse);
+ document.getElementById('genOut').textContent=kwh(y1.gen);
+ document.getElementById('directUse').textContent=kwh(y1.direct);
+ document.getElementById('batteryUse').textContent=kwh(y1.battDelivered);
+ document.getElementById('eqUse').textContent=kwh(y1.eq);
+ document.getElementById('sellKwh').textContent=kwh(y1.sell);
+ let cum=0,rows='';
+ for(let y=1;y<=20;y++){
+   const r=calcYear(y,base); cum+=r.benefit;
+   if([5,10,15,20].includes(y)) rows+=`<tr><td>${y}年</td><td>${yen(cum)}</td><td>${yen(cum-price)}</td></tr>`;
+ }
+ document.getElementById('longRows').innerHTML=rows;
+ const patNames={1:'太陽光のみ',2:'太陽光＋蓄電池',3:'太陽光＋蓄電池＋エコキュート昼間沸き上げ',4:'既設太陽光＋蓄電池',5:'既設太陽光＋蓄電池＋エコキュート交換'};
+ const cond=[`導入パターン：${patNames[p]}`,`世帯人数：${get('family')}人`,`昼間在宅人数：${get('dayPeople')}人`,`夏場電気代：${yen(get('summerBill'))}/月`,`冬場電気代：${yen(get('winterBill'))}/月`,`買電単価：${get('buyUnit')}円/kWh`,`実質導入費：${yen(price)}`];
+ if(p<4) cond.push(`年間予測発電量：${kwh(get('annualGen'))}`); else cond.push(`年間売電金額：${yen(get('annualSellYen'))}`,`売電単価：約${get('sellUnitExisting')}円/kWh`);
+ if([2,3,4,5].includes(p)) cond.push(`蓄電池容量：${get('batteryKwh')}kWh`,`充放電総合効率：${get('batteryEff')}%`);
+ if([3,5].includes(p)) cond.push(`エコキュート昼間移行率：${get('eqShift')}%`);
+ cond.push(`太陽光経年劣化：${base.useDegrade?get('degrade')+'%/年':'考慮しない'}`,`電気料金上昇率：${get('priceRise')}%/年`);
+ document.getElementById('conditions').innerHTML=cond.join('<br>');
+ const nm=document.getElementById('name').value||'お客様'; const st=document.getElementById('staff').value||'-';
+ document.getElementById('printMeta').textContent=`${nm}　｜　担当：${st}　｜　${new Date().toLocaleDateString('ja-JP')}`;
+}
+function resetForm(){ location.reload(); }
+function printProposal(){
+  calculate();
+  setTimeout(()=>{
+    try{ window.print(); }
+    catch(e){ alert('印刷画面を開けませんでした。ブラウザの共有メニューから「プリント」→「PDFとして保存」を選んでください。'); }
+  },120);
+}
+window.addEventListener('DOMContentLoaded',()=>{
+  const st=document.getElementById('jsStatus'); if(st) st.textContent='JavaScript動作中';
+  document.querySelectorAll('input[name=pattern]').forEach(x=>x.addEventListener('change',()=>{updateBoxes();calculate();}));
+  document.getElementById('useDegrade').addEventListener('change',e=>{document.getElementById('degrade').disabled=!e.target.checked; calculate();});
+  updateBoxes();
+  calculate();
+});
+</script>
+</body>
+</html>
