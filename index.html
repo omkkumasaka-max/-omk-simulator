@@ -31,9 +31,9 @@
     html,body{margin:0!important;padding:0!important;background:#fff!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
     body *{visibility:hidden!important}
     #proposalPrint,#proposalPrint *{visibility:visible!important}
-    #proposalPrint{display:block!important;position:absolute!important;left:0!important;top:0!important;width:297mm!important;background:#fff!important;color:#142128!important}
-    .proposal-page{width:297mm!important;height:210mm!important;min-height:210mm!important;max-height:210mm!important;padding:12mm 14mm!important;overflow:hidden!important;page-break-after:always!important;break-after:page!important;position:relative!important;background:#fff!important}
-    .proposal-page:last-child{page-break-after:auto!important;break-after:auto!important}
+    #proposalPrint{display:block!important;position:static!important;width:100%!important;background:#fff!important;color:#142128!important}
+    .proposal-page{box-sizing:border-box!important;width:100%!important;height:auto!important;min-height:0!important;max-height:none!important;padding:12mm 14mm!important;overflow:visible!important;page-break-after:auto!important;break-after:auto!important;page-break-inside:avoid!important;break-inside:avoid-page!important;position:relative!important;background:#fff!important}
+    .proposal-page + .proposal-page{page-break-before:always!important;break-before:page!important}
     .proposal-page:after{content:"";position:absolute;right:-28mm;top:-32mm;width:98mm;height:98mm;border-radius:50%;background:rgba(12,104,96,.055);z-index:0}
     .proposal-page>*{position:relative;z-index:1}
     .p-topbar{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #dbe6e4;padding-bottom:4mm;margin-bottom:7mm}
