@@ -143,6 +143,7 @@
           <button type="button" id="pdfBtn" class="btn secondary" >提案書PDF出力</button>
           <button type="button" id="resetBtn" class="btn outline" >初期値に戻す</button>
         </div>
+        <div id="actionStatus" class="hint" style="margin-top:10px;font-weight:700;color:#0f766e"></div>
       </div>
     </div>
 
@@ -237,7 +238,8 @@
 <script>
 const yen=n=>Math.round(n).toLocaleString('ja-JP')+'円';
 const kwh=n=>Math.round(n).toLocaleString('ja-JP')+' kWh';
-const get=id=>Number(document.getElementById(id).value)||0;
+const $=id=>document.getElementById(id);
+const get=id=>Number($(id).value)||0;
 function currentPattern(){return Number(document.querySelector('input[name=pattern]:checked').value)}
 function updateBoxes(){
  const p=currentPattern();
@@ -341,6 +343,7 @@ function calculate(){
  document.getElementById('conditions').innerHTML=cond.join('<br>');
  const nm=document.getElementById('name').value||'お客様'; const st=document.getElementById('staff').value||'-';
  document.getElementById('printMeta').textContent=`${nm}　｜　担当：${st}　｜　${new Date().toLocaleDateString('ja-JP')}`;
+ const status=$('actionStatus'); if(status){ status.textContent='再計算しました：'+new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit',second:'2-digit'}); }
 }
 function resetForm(){ location.reload(); }
 function populateProposal(){
@@ -359,6 +362,7 @@ function populateProposal(){
 function printProposal(){
   calculate();
   populateProposal();
+  const status=$('actionStatus'); if(status) status.textContent='提案書PDFを開きます…';
   try{ window.print(); }
   catch(e){ alert('印刷画面を開けませんでした。Safariの共有ボタンから「プリント」を選んでください。'); }
 }
@@ -368,20 +372,9 @@ window.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('useDegrade').addEventListener('change',e=>{document.getElementById('degrade').disabled=!e.target.checked; calculate();});
 
   const bindTap=(id,fn)=>{
-    const el=document.getElementById(id);
+    const el=$(id);
     if(!el) return;
-    let touched=false;
-    el.addEventListener('touchend',e=>{
-      touched=true;
-      e.preventDefault();
-      fn();
-      setTimeout(()=>touched=false,500);
-    },{passive:false});
-    el.addEventListener('click',e=>{
-      e.preventDefault();
-      if(touched) return;
-      fn();
-    });
+    el.onclick=function(e){ e.preventDefault(); fn(); };
   };
   bindTap('calcBtn',calculate);
   bindTap('pdfBtn',printProposal);
