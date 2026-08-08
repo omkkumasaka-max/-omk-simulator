@@ -16,54 +16,108 @@
   h2{font-size:18px;margin:0 0 16px} h3{font-size:15px;margin:18px 0 10px;color:#344054}.row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.row3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
   label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px} input,select{width:100%;padding:11px 12px;border:1px solid #d0d5dd;border-radius:10px;background:#fff;font-size:14px}.hint{font-size:11px;color:var(--muted);margin-top:5px}
   .patterns{display:grid;grid-template-columns:1fr;gap:8px}.pat{display:flex;align-items:flex-start;gap:10px;padding:12px;border:1px solid var(--line);border-radius:12px;cursor:pointer}.pat input{width:auto;margin-top:3px}.pat strong{display:block;font-size:14px}.pat span{font-size:12px;color:var(--muted)}
-  .btns{display:flex;gap:10px;flex-wrap:wrap}.btn{position:relative;z-index:20;border:0;border-radius:12px;padding:14px 18px;font-weight:700;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:rgba(0,0,0,.08)}.primary{background:var(--brand);color:#fff}.secondary{background:#eef2f6;color:#24324a}.outline{background:#fff;border:1px solid var(--line)}
+  .btns{display:flex;gap:10px;flex-wrap:wrap}.btn{border:0;border-radius:12px;padding:12px 18px;font-weight:700;cursor:pointer}.primary{background:var(--brand);color:#fff}.secondary{background:#eef2f6;color:#24324a}.outline{background:#fff;border:1px solid var(--line)}
   .metrics{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.metric{padding:14px;border-radius:14px;background:#f8fafc;border:1px solid var(--line)}.metric b{display:block;font-size:22px;margin-top:4px}.metric small{color:var(--muted)}
   .big{padding:18px;border-radius:16px;background:#ecfdf5;border:1px solid #bbf7d0;margin:12px 0}.big .num{font-size:34px;font-weight:800;color:var(--good)}
   table{width:100%;border-collapse:collapse;font-size:13px} th,td{padding:9px;border-bottom:1px solid var(--line);text-align:right} th:first-child,td:first-child{text-align:left}.note{font-size:11px;color:var(--muted);line-height:1.65}
   .hidden{display:none!important}.checkline{display:flex;align-items:center;gap:8px;margin:10px 0}.checkline input{width:auto}.section-title{padding-top:4px;border-top:1px dashed var(--line);margin-top:18px}
   .print-head{display:none}
   @media(max-width:850px){.grid{grid-template-columns:1fr}.row,.row3{grid-template-columns:1fr}.metrics{grid-template-columns:1fr}}
+  @media print{
+    body{background:#fff}.no-print,.hero,.input-pane{display:none!important}.wrap{max-width:none;padding:0}.grid{display:block}.result-pane{display:block}.card{box-shadow:none;border:0;border-radius:0;padding:12mm;margin:0}.print-head{display:block;border-bottom:2px solid #111;padding-bottom:8px;margin-bottom:16px}.print-head h1{font-size:20px;margin:0}.print-head p{font-size:11px;color:#555}.metric{break-inside:avoid}.note{font-size:9px}
+  }
 
-  /* ===== お客様向け提案書（A4横） ===== */
   #proposalPrint{display:none}
   @media print{
-    @page{size:A4 landscape;margin:0}
-    html,body{margin:0!important;padding:0!important;background:#fff!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
-    body>.wrap{display:none!important}
-    #proposalPrint{display:block!important;position:static!important;width:297mm!important;margin:0!important;padding:0!important;background:#fff!important;color:#142128!important}
-    .proposal-page{box-sizing:border-box!important;width:297mm!important;height:210mm!important;min-height:210mm!important;max-height:210mm!important;padding:10mm 13mm!important;overflow:hidden!important;position:relative!important;background:#fff!important;page-break-inside:avoid!important;break-inside:avoid-page!important;page-break-after:always!important;break-after:page!important}
-    .proposal-page:last-child{page-break-after:auto!important;break-after:auto!important}
-    .proposal-page:after{content:"";position:absolute;right:-18mm;top:-20mm;width:72mm;height:72mm;border-radius:50%;background:rgba(12,104,96,.055);z-index:0}
-    .proposal-page>*{position:relative;z-index:1}
-    .p-topbar{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #dbe6e4;padding-bottom:4mm;margin-bottom:7mm}
-    .p-brand{display:flex;align-items:baseline;gap:3mm}.p-logo{font-size:25px;font-weight:900;letter-spacing:.08em;color:#0b6b64}.p-brand-name{font-size:9px;font-weight:700;letter-spacing:.18em;color:#667b79}
-    .p-docmeta{font-size:9px;color:#6b7b80;text-align:right;line-height:1.6}
-    .p-eyebrow{font-size:10px;font-weight:800;letter-spacing:.12em;color:#0b6b64;text-transform:uppercase;margin-bottom:2.5mm}
-    .p-title{font-size:25px;line-height:1.25;font-weight:900;letter-spacing:.01em;margin:0;color:#142128}
-    .p-lead{font-size:10.5px;line-height:1.75;color:#5d6d73;margin:3mm 0 0}
-    .p-pill{display:inline-flex;align-items:center;padding:2.4mm 4mm;border-radius:999px;background:#eaf6f3;color:#09665e;font-size:10px;font-weight:800;margin-top:4mm}
-    .p-hero-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:7mm;margin-top:8mm}
-    .p-benefit{background:linear-gradient(135deg,#0a7269,#095b55);color:#fff;border-radius:7mm;padding:8mm 9mm;min-height:62mm;display:flex;flex-direction:column;justify-content:space-between;box-shadow:0 4mm 10mm rgba(9,91,85,.13)}
-    .p-benefit-label{font-size:10px;font-weight:700;color:#cdece7}.p-benefit-num{font-size:34px;line-height:1;font-weight:900;letter-spacing:-.02em;margin:2mm 0}.p-benefit-sub{font-size:10px;line-height:1.7;color:#e2f5f1}
-    .p-costbox{display:grid;grid-template-columns:1fr 1fr;gap:4mm}
-    .p-card{border:1px solid #dbe5e4;border-radius:5mm;padding:5mm;background:#fff;box-shadow:0 2mm 6mm rgba(27,61,58,.045)}
-    .p-card.accent{background:#f4faf8;border-color:#cce2de}
-    .p-card-label{font-size:9px;color:#6c7c81;margin-bottom:1.5mm}.p-card-num{font-size:19px;font-weight:900;color:#17252b;letter-spacing:-.02em}.p-card-note{font-size:8.3px;color:#7c8b8f;margin-top:1.5mm}
-    .p-flow{display:grid;grid-template-columns:1fr 14mm 1fr 14mm 1fr 14mm 1fr;align-items:center;margin-top:8mm;padding:5mm 6mm;border-radius:5mm;background:#f7faf9;border:1px solid #e1e9e7}
-    .p-flow-box{text-align:center}.p-flow-icon{width:12mm;height:12mm;border-radius:50%;background:#e3f1ee;margin:0 auto 2mm;display:flex;align-items:center;justify-content:center;font-size:16px}.p-flow-name{font-size:9px;font-weight:800;color:#33454b}.p-arrow{text-align:center;font-size:18px;color:#85a09c;font-weight:900}
-    .p-section-title{font-size:17px;font-weight:900;margin:0;color:#17252b}.p-section-sub{font-size:9.5px;color:#68787d;margin-top:1.5mm}
-    .p-section-head{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:5mm}
-    .p-kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:4mm;margin-bottom:7mm}
-    .p-kpi{border-radius:5mm;padding:5mm 5mm 4mm;background:#f8fbfa;border:1px solid #dce7e4}.p-kpi strong{display:block;font-size:18px;color:#17252b;margin-top:1mm}.p-kpi small{font-size:8.7px;color:#738388}
-    .p-two-col{display:grid;grid-template-columns:1fr 1fr;gap:7mm}
-    .p-panel{border:1px solid #dde6e4;border-radius:5mm;padding:5mm 6mm;background:#fff}.p-panel h3{font-size:11px;color:#33464a;margin:0 0 3mm;font-weight:900}
-    .p-table{width:100%;border-collapse:collapse;font-size:9px;margin:0}.p-table th,.p-table td{padding:2.5mm 1.5mm;border-bottom:1px solid #e8edec}.p-table th{text-align:left;color:#68797d;font-weight:600}.p-table td{text-align:right;color:#17252b;font-weight:800}
-    .p-timeline{display:grid;grid-template-columns:repeat(4,1fr);gap:4mm;margin-top:4mm}.p-year{border-radius:4mm;background:#f3f8f7;padding:4mm;text-align:center;border:1px solid #dce6e4}.p-year .year{font-size:9px;color:#68797d}.p-year .value{font-size:15px;font-weight:900;color:#0a6b63;margin-top:1mm}
-    .p-note-box{background:#f7faf9;border-left:4px solid #0b6b64;border-radius:3mm;padding:4mm 5mm;font-size:9.2px;line-height:1.75;color:#53666b}
-    .p-conditions{display:grid;grid-template-columns:1fr 1fr;gap:4mm 9mm;font-size:9.3px;line-height:1.7;color:#43565b}.p-conditions div{padding-bottom:2mm;border-bottom:1px solid #edf1f0}
-    .p-footer{position:absolute!important;left:14mm!important;right:14mm!important;bottom:7mm!important;display:flex;justify-content:space-between;border-top:1px solid #dfe7e5;padding-top:2.5mm;font-size:8px;color:#7a898d}
-    .p-page-no{font-weight:800;color:#54706b}
+    body *{visibility:hidden!important}
+    #proposalPrint,#proposalPrint *{visibility:visible!important}
+    #proposalPrint{display:block!important;position:absolute;left:0;top:0;width:100%;background:#fff;color:#172033}
+    .proposal-page{width:210mm;min-height:297mm;padding:16mm 15mm;page-break-after:always;background:#fff}
+    .proposal-page:last-child{page-break-after:auto}
+    .p-logo{font-size:28px;font-weight:900;letter-spacing:.04em;color:#0f766e}
+    .p-sub{font-size:12px;color:#667085;margin-top:4px}
+    .p-cover{display:flex;flex-direction:column;justify-content:space-between}
+    .p-cover-main{padding-top:45mm}
+    .p-cover h1{font-size:30px;line-height:1.45;margin:0 0 10mm}
+    .p-cover .customer{font-size:22px;font-weight:800;margin-bottom:8mm}
+    .p-badge{display:inline-block;padding:6px 12px;border-radius:999px;background:#ecfdf5;color:#166534;font-weight:700;font-size:12px}
+    .p-footer{font-size:10px;color:#667085;border-top:1px solid #d0d5dd;padding-top:5mm}
+    .p-title{font-size:23px;font-weight:800;margin:0 0 9mm;border-left:6px solid #0f766e;padding-left:10px}
+    .p-lead{font-size:13px;line-height:1.8;color:#475467;margin-bottom:8mm}
+    .p-kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:5mm;margin:6mm 0 10mm}
+    .p-kpi{border:1px solid #d0d5dd;border-radius:12px;padding:6mm;background:#f8fafc}
+    .p-kpi small{font-size:10px;color:#667085}.p-kpi strong{display:block;font-size:24px;margin-top:2mm}
+    .p-highlight{border:2px solid #86efac;background:#f0fdf4;border-radius:14px;padding:7mm;margin:7mm 0}
+    .p-highlight small{font-size:11px;color:#166534}.p-highlight strong{display:block;font-size:30px;color:#166534;margin-top:2mm}
+    .p-table{width:100%;border-collapse:collapse;margin-top:5mm;font-size:11px}.p-table th,.p-table td{padding:3.4mm;border-bottom:1px solid #e5e7eb}.p-table th{text-align:left;background:#f8fafc}.p-table td:last-child{text-align:right;font-weight:700}
+    .p-section{margin-top:9mm}.p-section h3{font-size:15px;margin:0 0 4mm;color:#344054}
+    .p-note{font-size:9px;line-height:1.7;color:#667085}
+    .p-summary{font-size:15px;line-height:1.9;background:#f8fafc;border-radius:12px;padding:6mm;margin-top:7mm}
   }
+
+
+  /* ===== OMK 提案書PDF 印刷修正版（iPhone/Safari対応） ===== */
+  @page { size: A4 landscape; margin: 0; }
+
+  @media print {
+    html, body {
+      width: 297mm !important;
+      height: auto !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      background: #fff !important;
+    }
+    body > .wrap { display: none !important; }
+    body * { visibility: hidden !important; }
+    #proposalPrint, #proposalPrint * { visibility: visible !important; }
+    #proposalPrint {
+      display: block !important;
+      position: static !important;
+      width: 297mm !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      background: #fff !important;
+    }
+    #proposalPrint .proposal-page {
+      display: block;
+      position: relative;
+      width: 296mm !important;
+      height: 208mm !important;
+      min-height: 0 !important;
+      max-height: 208mm !important;
+      margin: 0 !important;
+      padding: 11mm 13mm !important;
+      overflow: hidden !important;
+      box-sizing: border-box !important;
+      break-before: auto !important;
+      break-after: page !important;
+      break-inside: avoid !important;
+      page-break-before: auto !important;
+      page-break-after: always !important;
+      page-break-inside: avoid !important;
+      background: #fff !important;
+    }
+    #proposalPrint .proposal-page:last-child {
+      break-after: auto !important;
+      page-break-after: auto !important;
+    }
+    #proposalPrint .proposal-page.p-cover {
+      display: flex !important;
+      flex-direction: column !important;
+      justify-content: space-between !important;
+    }
+    #proposalPrint .p-cover-main { padding-top: 20mm !important; }
+    #proposalPrint .p-title { margin-bottom: 5mm !important; }
+    #proposalPrint .p-lead { margin-bottom: 4mm !important; }
+    #proposalPrint .p-kpi-grid { margin: 4mm 0 5mm !important; gap: 4mm !important; }
+    #proposalPrint .p-kpi { padding: 4mm !important; }
+    #proposalPrint .p-highlight { margin: 4mm 0 !important; padding: 4mm !important; }
+    #proposalPrint .p-section { margin-top: 4mm !important; }
+    #proposalPrint .p-table { margin-top: 3mm !important; }
+    #proposalPrint .p-table th, #proposalPrint .p-table td { padding: 2.2mm !important; }
+    a[href]::after { content: none !important; }
+  }
+
 </style>
 </head>
 <body>
@@ -148,11 +202,10 @@
 
       <div class="card no-print">
         <div class="btns">
-          <button type="button" id="calcBtn" class="btn primary" >シミュレーション実行</button>
-          <button type="button" id="pdfBtn" class="btn secondary" >提案書PDF出力</button>
-          <button type="button" id="resetBtn" class="btn outline" >初期値に戻す</button>
+          <button type="button" id="calcBtn" class="btn primary" onclick="calculate(); return false;">シミュレーション実行</button>
+          <button type="button" id="pdfBtn" class="btn secondary" onclick="printProposal(); return false;">提案書PDF出力</button>
+          <button type="button" id="resetBtn" class="btn outline" onclick="resetForm(); return false;">初期値に戻す</button>
         </div>
-        <div id="actionStatus" class="hint" style="margin-top:10px;font-weight:700;color:#0f766e"></div>
       </div>
     </div>
 
@@ -189,101 +242,65 @@
 </div>
 
 <div id="proposalPrint">
-  <!-- 1ページ目：提案サマリー -->
-  <section class="proposal-page">
-    <div class="p-topbar">
-      <div class="p-brand"><div class="p-logo">OMK</div><div class="p-brand-name">ENERGY SOLUTION</div></div>
-      <div class="p-docmeta" id="pMeta">作成日・担当</div>
+  <section class="proposal-page p-cover">
+    <div>
+      <div class="p-logo">OMK</div>
+      <div class="p-sub">太陽光・蓄電池 導入効果シミュレーション</div>
     </div>
-    <div class="p-eyebrow">ENERGY COST OPTIMIZATION PLAN</div>
-    <h1 class="p-title"><span id="pCustomer">お客様</span><br>太陽光・蓄電池 導入効果ご提案</h1>
-    <div class="p-pill" id="pPatternBadge">導入プラン</div>
-
-    <div class="p-hero-grid">
-      <div class="p-benefit">
-        <div><div class="p-benefit-label">年間経済効果（概算）</div><div class="p-benefit-num" id="pAnnualBenefit">-</div></div>
-        <div class="p-benefit-sub" id="pSummaryText">導入効果の概要</div>
-      </div>
-      <div class="p-costbox">
-        <div class="p-card"><div class="p-card-label">現在の年間電気代</div><div class="p-card-num" id="pAnnualBill">-</div><div class="p-card-note">現在のご利用状況から推計</div></div>
-        <div class="p-card accent"><div class="p-card-label">導入後の年間買電費</div><div class="p-card-num" id="pAfterBill">-</div><div class="p-card-note">太陽光・蓄電活用後の推計</div></div>
-        <div class="p-card"><div class="p-card-label">年間売電収入</div><div class="p-card-num" id="pSellIncome">-</div><div class="p-card-note">余剰電力の売電見込</div></div>
-        <div class="p-card accent"><div class="p-card-label">投資回収目安</div><div class="p-card-num" id="pPayback">-</div><div class="p-card-note">実質導入費÷年間効果</div></div>
-      </div>
+    <div class="p-cover-main">
+      <div class="p-badge" id="pPatternBadge">導入プラン</div>
+      <h1>光熱費削減・導入効果<br>ご提案書</h1>
+      <div class="customer" id="pCustomer">お客様</div>
+      <div class="p-sub" id="pMeta">作成日</div>
     </div>
-
-    <div class="p-flow">
-      <div class="p-flow-box"><div class="p-flow-icon">☀</div><div class="p-flow-name">太陽光で発電</div></div><div class="p-arrow">›</div>
-      <div class="p-flow-box"><div class="p-flow-icon">⌂</div><div class="p-flow-name">昼間に自家消費</div></div><div class="p-arrow">›</div>
-      <div class="p-flow-box"><div class="p-flow-icon">▣</div><div class="p-flow-name">余剰を有効活用</div></div><div class="p-arrow">›</div>
-      <div class="p-flow-box"><div class="p-flow-icon">¥</div><div class="p-flow-name">買電負担を削減</div></div>
-    </div>
-    <div class="p-footer"><span>株式会社OMK｜太陽光発電・蓄電池・エコキュート</span><span class="p-page-no">01 / 03</span></div>
+    <div class="p-footer">株式会社OMK　｜　本資料は簡易シミュレーションに基づくご提案書です。</div>
   </section>
 
-  <!-- 2ページ目：電力と長期効果 -->
   <section class="proposal-page">
-    <div class="p-topbar">
-      <div class="p-brand"><div class="p-logo">OMK</div><div class="p-brand-name">ENERGY SOLUTION</div></div>
-      <div class="p-docmeta">導入効果シミュレーション</div>
+    <h2 class="p-title">1. 現在の光熱費と導入効果</h2>
+    <p class="p-lead">お客様から伺った電気料金・世帯人数・在宅状況等をもとに、導入後の年間電気代と経済効果を概算しています。</p>
+    <div class="p-kpi-grid">
+      <div class="p-kpi"><small>現在の年間電気代（推計）</small><strong id="pAnnualBill">-</strong></div>
+      <div class="p-kpi"><small>導入後の年間買電費（推計）</small><strong id="pAfterBill">-</strong></div>
+      <div class="p-kpi"><small>年間売電収入（推計）</small><strong id="pSellIncome">-</strong></div>
+      <div class="p-kpi"><small>投資回収目安</small><strong id="pPayback">-</strong></div>
     </div>
-    <div class="p-section-head"><div><h2 class="p-section-title">電力の使い方と長期的な経済効果</h2><div class="p-section-sub">発電した電気を「使う・貯める・売る」に振り分けた場合の概算です。</div></div></div>
-
-    <div class="p-kpi-row">
-      <div class="p-kpi"><small>年間電力使用量</small><strong id="pAnnualUse">-</strong></div>
-      <div class="p-kpi"><small>年間発電量</small><strong id="pGenOut">-</strong></div>
-      <div class="p-kpi"><small>蓄電池経由の利用</small><strong id="pBatteryUse">-</strong></div>
-      <div class="p-kpi"><small>年間売電量</small><strong id="pSellKwh">-</strong></div>
-    </div>
-
-    <div class="p-two-col">
-      <div class="p-panel">
-        <h3>年間エネルギー内訳</h3>
-        <table class="p-table"><tbody>
-          <tr><th>年間電力使用量 推計</th><td id="pAnnualUse2">-</td></tr>
-          <tr><th>太陽光年間発電量</th><td id="pGenOut2">-</td></tr>
-          <tr><th>直接自家消費量</th><td id="pDirectUse">-</td></tr>
-          <tr><th>蓄電池経由の自家消費量</th><td id="pBatteryUse2">-</td></tr>
-          <tr><th>エコキュート昼間活用量</th><td id="pEqUse">-</td></tr>
-          <tr><th>年間売電量</th><td id="pSellKwh2">-</td></tr>
-        </tbody></table>
-      </div>
-      <div class="p-panel">
-        <h3>長期の累積経済効果</h3>
-        <table class="p-table"><thead><tr><th>期間</th><th>累積経済効果</th><th>導入費との差</th></tr></thead><tbody id="pLongRows"></tbody></table>
-        <div class="p-note-box" style="margin-top:5mm">長期試算では、入力された電気料金上昇率・太陽光劣化率の設定を反映します。未設定の場合は現在条件を基本として計算します。</div>
-      </div>
-    </div>
-    <div class="p-footer"><span>OMK ENERGY SOLUTION｜導入効果ご提案書</span><span class="p-page-no">02 / 03</span></div>
+    <div class="p-highlight"><small>年間経済効果（概算）</small><strong id="pAnnualBenefit">-</strong></div>
+    <div class="p-summary" id="pSummaryText">導入効果の概要</div>
   </section>
 
-  <!-- 3ページ目：条件・注意事項 -->
   <section class="proposal-page">
-    <div class="p-topbar">
-      <div class="p-brand"><div class="p-logo">OMK</div><div class="p-brand-name">ENERGY SOLUTION</div></div>
-      <div class="p-docmeta">SIMULATION CONDITIONS</div>
+    <h2 class="p-title">2. 電力の使い方と長期効果</h2>
+    <div class="p-section"><h3>年間エネルギー内訳</h3>
+      <table class="p-table"><tbody>
+        <tr><th>年間電力使用量 推計</th><td id="pAnnualUse">-</td></tr>
+        <tr><th>太陽光年間発電量</th><td id="pGenOut">-</td></tr>
+        <tr><th>直接自家消費量</th><td id="pDirectUse">-</td></tr>
+        <tr><th>蓄電池経由の自家消費量</th><td id="pBatteryUse">-</td></tr>
+        <tr><th>エコキュート昼間活用量</th><td id="pEqUse">-</td></tr>
+        <tr><th>年間売電量</th><td id="pSellKwh">-</td></tr>
+      </tbody></table>
     </div>
-    <div class="p-section-head"><div><h2 class="p-section-title">今回のシミュレーション条件</h2><div class="p-section-sub">お客様から伺った情報と、今回の提案設備をもとに算出しています。</div></div></div>
-    <div class="p-panel" style="padding:7mm">
-      <div class="p-conditions" id="pConditions">条件</div>
+    <div class="p-section"><h3>長期の累積経済効果</h3>
+      <table class="p-table"><thead><tr><th>期間</th><th style="text-align:right">累積経済効果</th><th style="text-align:right">実質導入費との差</th></tr></thead><tbody id="pLongRows"></tbody></table>
     </div>
-    <div style="margin-top:7mm" class="p-note-box">
-      <strong style="color:#29433f">本シミュレーションについて</strong><br>
-      本資料は、お客様からご提供いただいた情報および標準的な電力使用モデルをもとに算出した概算です。実際の発電量・電気使用量・電気料金・売電収入・削減効果・投資回収期間を保証するものではありません。天候、機器仕様、生活パターン、電気料金プラン、売電条件、設備の運転設定等により実績は変動します。
+  </section>
+
+  <section class="proposal-page">
+    <h2 class="p-title">3. シミュレーション条件</h2>
+    <div class="p-section"><div class="p-note" id="pConditions"></div></div>
+    <div class="p-section"><h3>ご確認事項</h3>
+      <p class="p-note">本シミュレーションは、お客様からご提供いただいた情報および標準的な電力使用モデルをもとに算出した概算です。実際の発電量・電気使用量・電気料金・売電収入・削減効果・投資回収期間を保証するものではありません。天候、機器仕様、生活パターン、電気料金プラン、売電条件、設備の運転設定等により実績は変動します。</p>
+      <p class="p-note">正式なご提案時には、現地調査、機器仕様、設置条件、補助金の適用条件等を確認のうえ、最終見積をご案内いたします。</p>
     </div>
-    <div style="margin-top:5mm" class="p-note-box">
-      <strong style="color:#29433f">正式なお見積りについて</strong><br>
-      現地調査、設置条件、機器仕様、補助金の適用条件等を確認したうえで、最終的な機器構成・工事内容・お見積りをご案内いたします。
-    </div>
-    <div class="p-footer"><span>株式会社OMK｜本資料は簡易シミュレーションに基づくご提案です</span><span class="p-page-no">03 / 03</span></div>
+    <div class="p-footer" style="margin-top:30mm">株式会社OMK　｜　太陽光発電・蓄電池・エコキュート</div>
   </section>
 </div>
 
 <script>
 const yen=n=>Math.round(n).toLocaleString('ja-JP')+'円';
 const kwh=n=>Math.round(n).toLocaleString('ja-JP')+' kWh';
-const $=id=>document.getElementById(id);
-const get=id=>Number($(id).value)||0;
+const get=id=>Number(document.getElementById(id).value)||0;
 function currentPattern(){return Number(document.querySelector('input[name=pattern]:checked').value)}
 function updateBoxes(){
  const p=currentPattern();
@@ -387,7 +404,6 @@ function calculate(){
  document.getElementById('conditions').innerHTML=cond.join('<br>');
  const nm=document.getElementById('name').value||'お客様'; const st=document.getElementById('staff').value||'-';
  document.getElementById('printMeta').textContent=`${nm}　｜　担当：${st}　｜　${new Date().toLocaleDateString('ja-JP')}`;
- const status=$('actionStatus'); if(status){ status.textContent='再計算しました：'+new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit',second:'2-digit'}); }
 }
 function resetForm(){ location.reload(); }
 function populateProposal(){
@@ -398,15 +414,14 @@ function populateProposal(){
   $('pCustomer').textContent=($('name').value||'お客様')+'　御中';
   $('pMeta').textContent='作成日：'+new Date().toLocaleDateString('ja-JP')+'　担当：'+($('staff').value||'-');
   copy('annualBill','pAnnualBill'); copy('afterBill','pAfterBill'); copy('sellIncome','pSellIncome'); copy('payback','pPayback');
-  copy('annualBenefit','pAnnualBenefit'); copy('annualUse','pAnnualUse'); copy('annualUse','pAnnualUse2'); copy('genOut','pGenOut'); copy('genOut','pGenOut2'); copy('directUse','pDirectUse'); copy('batteryUse','pBatteryUse'); copy('batteryUse','pBatteryUse2'); copy('eqUse','pEqUse'); copy('sellKwh','pSellKwh'); copy('sellKwh','pSellKwh2');
+  copy('annualBenefit','pAnnualBenefit'); copy('annualUse','pAnnualUse'); copy('genOut','pGenOut'); copy('directUse','pDirectUse'); copy('batteryUse','pBatteryUse'); copy('eqUse','pEqUse'); copy('sellKwh','pSellKwh');
   $('pLongRows').innerHTML=$('longRows').innerHTML;
-  $('pConditions').innerHTML=$('conditions').innerHTML.split('<br>').map(x=>`<div>${x}</div>`).join('');
-  $('pSummaryText').innerHTML=`今回の「${patNames[p]}」では、年間で <strong>${$('annualBenefit').textContent}</strong> の経済効果を見込みます。投資回収の目安は <strong>${$('payback').textContent}</strong>。発電した電気をできるだけご家庭で活用し、将来の買電負担を抑えるプランです。`;
+  $('pConditions').innerHTML=$('conditions').innerHTML;
+  $('pSummaryText').innerHTML=`今回の「${patNames[p]}」プランでは、年間経済効果は <strong>${$('annualBenefit').textContent}</strong>、投資回収目安は <strong>${$('payback').textContent}</strong> です。現在の年間電気代と導入後の買電費を比較し、長期的な家計負担の軽減効果を確認できます。`;
 }
 function printProposal(){
   calculate();
   populateProposal();
-  const status=$('actionStatus'); if(status) status.textContent='提案書PDFを開きます…';
   try{ window.print(); }
   catch(e){ alert('印刷画面を開けませんでした。Safariの共有ボタンから「プリント」を選んでください。'); }
 }
@@ -414,16 +429,6 @@ window.addEventListener('DOMContentLoaded',()=>{
   const st=document.getElementById('jsStatus'); if(st) st.textContent='JavaScript動作中';
   document.querySelectorAll('input[name=pattern]').forEach(x=>x.addEventListener('change',()=>{updateBoxes();calculate();}));
   document.getElementById('useDegrade').addEventListener('change',e=>{document.getElementById('degrade').disabled=!e.target.checked; calculate();});
-
-  const bindTap=(id,fn)=>{
-    const el=$(id);
-    if(!el) return;
-    el.onclick=function(e){ e.preventDefault(); fn(); };
-  };
-  bindTap('calcBtn',calculate);
-  bindTap('pdfBtn',printProposal);
-  bindTap('resetBtn',resetForm);
-
   updateBoxes();
   calculate();
 });
