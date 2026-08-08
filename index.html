@@ -16,7 +16,7 @@
   h2{font-size:18px;margin:0 0 16px} h3{font-size:15px;margin:18px 0 10px;color:#344054}.row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.row3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
   label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px} input,select{width:100%;padding:11px 12px;border:1px solid #d0d5dd;border-radius:10px;background:#fff;font-size:14px}.hint{font-size:11px;color:var(--muted);margin-top:5px}
   .patterns{display:grid;grid-template-columns:1fr;gap:8px}.pat{display:flex;align-items:flex-start;gap:10px;padding:12px;border:1px solid var(--line);border-radius:12px;cursor:pointer}.pat input{width:auto;margin-top:3px}.pat strong{display:block;font-size:14px}.pat span{font-size:12px;color:var(--muted)}
-  .btns{display:flex;gap:10px;flex-wrap:wrap}.btn{border:0;border-radius:12px;padding:12px 18px;font-weight:700;cursor:pointer}.primary{background:var(--brand);color:#fff}.secondary{background:#eef2f6;color:#24324a}.outline{background:#fff;border:1px solid var(--line)}
+  .btns{display:flex;gap:10px;flex-wrap:wrap}.btn{position:relative;z-index:20;border:0;border-radius:12px;padding:14px 18px;font-weight:700;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:rgba(0,0,0,.08)}.primary{background:var(--brand);color:#fff}.secondary{background:#eef2f6;color:#24324a}.outline{background:#fff;border:1px solid var(--line)}
   .metrics{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.metric{padding:14px;border-radius:14px;background:#f8fafc;border:1px solid var(--line)}.metric b{display:block;font-size:22px;margin-top:4px}.metric small{color:var(--muted)}
   .big{padding:18px;border-radius:16px;background:#ecfdf5;border:1px solid #bbf7d0;margin:12px 0}.big .num{font-size:34px;font-weight:800;color:var(--good)}
   table{width:100%;border-collapse:collapse;font-size:13px} th,td{padding:9px;border-bottom:1px solid var(--line);text-align:right} th:first-child,td:first-child{text-align:left}.note{font-size:11px;color:var(--muted);line-height:1.65}
@@ -139,9 +139,9 @@
 
       <div class="card no-print">
         <div class="btns">
-          <button type="button" id="calcBtn" class="btn primary" onclick="calculate(); return false;">シミュレーション実行</button>
-          <button type="button" id="pdfBtn" class="btn secondary" onclick="printProposal(); return false;">提案書PDF出力</button>
-          <button type="button" id="resetBtn" class="btn outline" onclick="resetForm(); return false;">初期値に戻す</button>
+          <button type="button" id="calcBtn" class="btn primary" >シミュレーション実行</button>
+          <button type="button" id="pdfBtn" class="btn secondary" >提案書PDF出力</button>
+          <button type="button" id="resetBtn" class="btn outline" >初期値に戻す</button>
         </div>
       </div>
     </div>
@@ -366,6 +366,27 @@ window.addEventListener('DOMContentLoaded',()=>{
   const st=document.getElementById('jsStatus'); if(st) st.textContent='JavaScript動作中';
   document.querySelectorAll('input[name=pattern]').forEach(x=>x.addEventListener('change',()=>{updateBoxes();calculate();}));
   document.getElementById('useDegrade').addEventListener('change',e=>{document.getElementById('degrade').disabled=!e.target.checked; calculate();});
+
+  const bindTap=(id,fn)=>{
+    const el=document.getElementById(id);
+    if(!el) return;
+    let touched=false;
+    el.addEventListener('touchend',e=>{
+      touched=true;
+      e.preventDefault();
+      fn();
+      setTimeout(()=>touched=false,500);
+    },{passive:false});
+    el.addEventListener('click',e=>{
+      e.preventDefault();
+      if(touched) return;
+      fn();
+    });
+  };
+  bindTap('calcBtn',calculate);
+  bindTap('pdfBtn',printProposal);
+  bindTap('resetBtn',resetForm);
+
   updateBoxes();
   calculate();
 });
