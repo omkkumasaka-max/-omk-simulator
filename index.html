@@ -96,6 +96,7 @@
   }
 
 </style>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 </head>
 <body>
 <div class="wrap">
@@ -434,12 +435,194 @@ function populateProposal(){
   $('pConditions').innerHTML=$('conditions').innerHTML.split('<br>').map(x=>`<div>${x}</div>`).join('');
   $('pSummaryText').innerHTML=`今回の「${patNames[p]}」では、年間で <strong>${$('annualBenefit').textContent}</strong> の経済効果を見込みます。投資回収の目安は <strong>${$('payback').textContent}</strong>。発電した電気をできるだけご家庭で活用し、将来の買電負担を抑えるプランです。`;
 }
-function printProposal(){
+
+function roundedRect(ctx,x,y,w,h,r,fill,stroke){
+  ctx.beginPath();
+  ctx.roundRect(x,y,w,h,r);
+  if(fill){ctx.fillStyle=fill;ctx.fill();}
+  if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=1.5;ctx.stroke();}
+}
+function drawText(ctx,text,x,y,size=24,weight='400',color='#17252b',align='left'){
+  ctx.font=`${weight} ${size}px -apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",Meiryo,sans-serif`;
+  ctx.fillStyle=color; ctx.textAlign=align; ctx.textBaseline='alphabetic';
+  ctx.fillText(String(text),x,y);
+}
+function wrapText(ctx,text,x,y,maxWidth,lineHeight,size=22,weight='400',color='#53666b'){
+  ctx.font=`${weight} ${size}px -apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",Meiryo,sans-serif`;
+  ctx.fillStyle=color;ctx.textAlign='left';ctx.textBaseline='top';
+  const chars=[...String(text)]; let line='', yy=y;
+  for(const ch of chars){
+    const test=line+ch;
+    if(ctx.measureText(test).width>maxWidth && line){
+      ctx.fillText(line,x,yy); yy+=lineHeight; line=ch;
+    } else line=test;
+  }
+  if(line) ctx.fillText(line,x,yy);
+  return yy+lineHeight;
+}
+function pdfHeader(ctx,pageNo,title){
+  drawText(ctx,'OMK',90,78,42,'900','#0b6b64');
+  drawText(ctx,'ENERGY SOLUTION',185,77,18,'700','#667b79');
+  drawText(ctx,title,1510,74,18,'700','#607579','right');
+  ctx.strokeStyle='#dbe6e4';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(85,100);ctx.lineTo(1515,100);ctx.stroke();
+  drawText(ctx,'株式会社OMK',90,1085,16,'600','#7a898d');
+  drawText(ctx,`${pageNo} / 3`,1510,1085,16,'800','#54706b','right');
+}
+function metricCard(ctx,x,y,w,h,label,value,accent=false){
+  roundedRect(ctx,x,y,w,h,22,accent?'#eff8f5':'#f8fbfa',accent?'#c6dfda':'#dce7e4');
+  drawText(ctx,label,x+28,y+42,17,'600','#738388');
+  drawText(ctx,value,x+28,y+94,34,'900',accent?'#0a6b63':'#17252b');
+}
+function tableRow(ctx,x,y,w,label,value,alt=false){
+  if(alt){ctx.fillStyle='#f8fbfa';ctx.fillRect(x,y,w,48);}
+  drawText(ctx,label,x+18,y+31,17,'500','#5d7075');
+  drawText(ctx,value,x+w-18,y+31,18,'800','#17252b','right');
+  ctx.strokeStyle='#e6ecea';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x,y+48);ctx.lineTo(x+w,y+48);ctx.stroke();
+}
+function makeProposalCanvases(){
+  calculate(); populateProposal();
+  const W=1600,H=1131;
+  const canvases=[];
+  const mk=()=>{const c=document.createElement('canvas');c.width=W;c.height=H;const ctx=c.getContext('2d');ctx.fillStyle='#ffffff';ctx.fillRect(0,0,W,H);return [c,ctx];};
+  const patNames={1:'太陽光のみ',2:'太陽光＋蓄電池',3:'太陽光＋蓄電池＋エコキュート昼間沸き上げ',4:'既設太陽光＋蓄電池',5:'既設太陽光＋蓄電池＋エコキュート交換'};
+  const p=currentPattern();
+  const name=(document.getElementById('name').value||'お客様')+' 様';
+  const staff=document.getElementById('staff').value||'-';
+  const date=new Date().toLocaleDateString('ja-JP');
+  const annualBenefit=document.getElementById('annualBenefit').textContent;
+  const annualBill=document.getElementById('annualBill').textContent;
+  const afterBill=document.getElementById('afterBill').textContent;
+  const sellIncome=document.getElementById('sellIncome').textContent;
+  const payback=document.getElementById('payback').textContent;
+
+  // Page 1
+  {
+    const [c,ctx]=mk(); pdfHeader(ctx,1,'導入効果ご提案書');
+    drawText(ctx,'導入効果シミュレーション',90,175,20,'800','#0b6b64');
+    drawText(ctx,`${name}  ご提案書`,90,235,48,'900','#142128');
+    drawText(ctx,patNames[p],90,282,24,'800','#0a6b63');
+    drawText(ctx,`作成日：${date}　担当：${staff}`,1510,230,18,'500','#6b7b80','right');
+
+    roundedRect(ctx,90,330,900,300,34,'#0a6b63');
+    drawText(ctx,'年間経済効果（概算）',135,395,24,'700','#cdece7');
+    drawText(ctx,annualBenefit,135,505,70,'900','#ffffff');
+    wrapText(ctx,'現在の電気料金・発電量・生活パターンをもとに、設備導入後の家計メリットを概算しています。',135,545,780,34,20,'500','#e2f5f1');
+
+    metricCard(ctx,1030,330,480,135,'現在の年間電気代',annualBill,false);
+    metricCard(ctx,1030,485,480,135,'導入後の年間買電費',afterBill,true);
+    metricCard(ctx,90,680,340,150,'年間売電収入',sellIncome,false);
+    metricCard(ctx,455,680,340,150,'投資回収目安',payback,true);
+    metricCard(ctx,820,680,340,150,'実質導入費',yen(Math.max(0,get('price')-get('subsidy'))),false);
+    metricCard(ctx,1185,680,325,150,'補助金',yen(get('subsidy')),false);
+
+    roundedRect(ctx,90,875,1420,120,22,'#f7faf9','#e1e9e7');
+    drawText(ctx,'ご提案のポイント',120,918,20,'800','#33454b');
+    wrapText(ctx,`「${patNames[p]}」により、発電した電気をできるだけ家庭内で有効活用し、買電量の削減を目指すプランです。`,120,942,1340,30,18,'500','#53666b');
+    canvases.push(c);
+  }
+
+  // Page 2
+  {
+    const [c,ctx]=mk(); pdfHeader(ctx,2,'電力の使い方・長期効果');
+    drawText(ctx,'電力の使い方と長期効果',90,165,38,'900','#17252b');
+    drawText(ctx,'年間エネルギー内訳と、5〜20年間の累積経済効果を確認します。',90,205,19,'500','#68787d');
+
+    roundedRect(ctx,90,250,680,610,24,'#ffffff','#dde6e4');
+    drawText(ctx,'年間エネルギー内訳',120,300,23,'800','#33464a');
+    const rows=[
+      ['年間電力使用量 推計',document.getElementById('annualUse').textContent],
+      ['太陽光年間発電量',document.getElementById('genOut').textContent],
+      ['直接自家消費量',document.getElementById('directUse').textContent],
+      ['蓄電池経由の自家消費量',document.getElementById('batteryUse').textContent],
+      ['エコキュート昼間活用量',document.getElementById('eqUse').textContent],
+      ['年間売電量',document.getElementById('sellKwh').textContent],
+    ];
+    rows.forEach((r,i)=>tableRow(ctx,120,330+i*72,620,r[0],r[1],i%2===0));
+
+    roundedRect(ctx,810,250,700,610,24,'#ffffff','#dde6e4');
+    drawText(ctx,'長期の累積経済効果',840,300,23,'800','#33464a');
+    const trs=[...document.querySelectorAll('#longRows tr')].map(tr=>[...tr.children].map(td=>td.textContent));
+    const xs=[840,1005,1170,1335];
+    trs.forEach((r,i)=>{
+      roundedRect(ctx,xs[i],350,145,175,20,'#f3f8f7','#dce6e4');
+      drawText(ctx,r[0],xs[i]+72,390,19,'700','#68797d','center');
+      drawText(ctx,r[1],xs[i]+72,445,24,'900','#0a6b63','center');
+      drawText(ctx,'累積効果',xs[i]+72,480,15,'500','#7b8b8f','center');
+    });
+    drawText(ctx,'実質導入費との差',840,595,19,'800','#33464a');
+    trs.forEach((r,i)=>{
+      drawText(ctx,r[0],840,645+i*52,17,'700','#66797d');
+      drawText(ctx,r[2],1470,645+i*52,20,'900',r[2].includes('-')?'#b45309':'#0a6b63','right');
+      ctx.strokeStyle='#e7eceb';ctx.beginPath();ctx.moveTo(840,660+i*52);ctx.lineTo(1470,660+i*52);ctx.stroke();
+    });
+
+    roundedRect(ctx,90,900,1420,105,22,'#eff8f5','#cce2de');
+    drawText(ctx,'長期試算について',120,940,19,'800','#0a6b63');
+    wrapText(ctx,'電気料金上昇率や太陽光パネルの経年劣化率を設定した場合は、その条件を各年の試算に反映します。',120,960,1340,29,17,'500','#53666b');
+    canvases.push(c);
+  }
+
+  // Page 3
+  {
+    const [c,ctx]=mk(); pdfHeader(ctx,3,'シミュレーション条件');
+    drawText(ctx,'シミュレーション条件',90,165,38,'900','#17252b');
+    drawText(ctx,'今回の試算に使用した主な前提条件です。',90,205,19,'500','#68787d');
+
+    const condText=document.getElementById('conditions').innerText.split('
+').filter(Boolean);
+    roundedRect(ctx,90,250,900,650,24,'#ffffff','#dde6e4');
+    drawText(ctx,'試算条件',120,300,23,'800','#33464a');
+    condText.forEach((t,i)=>{
+      const yy=345+i*50;
+      drawText(ctx,t,125,yy,18,'600','#43565b');
+      ctx.strokeStyle='#edf1f0';ctx.beginPath();ctx.moveTo(120,yy+16);ctx.lineTo(955,yy+16);ctx.stroke();
+    });
+
+    roundedRect(ctx,1030,250,480,650,24,'#f7faf9','#dce7e4');
+    drawText(ctx,'ご確認事項',1060,300,23,'800','#33464a');
+    let yy=350;
+    yy=wrapText(ctx,'本シミュレーションは、お客様からご提供いただいた情報および標準的な電力使用モデルをもとに算出した概算です。',1060,yy,420,32,18,'500','#53666b')+12;
+    yy=wrapText(ctx,'実際の発電量・電気使用量・電気料金・売電収入・削減効果・投資回収期間を保証するものではありません。',1060,yy,420,32,18,'500','#53666b')+12;
+    yy=wrapText(ctx,'天候、生活パターン、料金プラン、売電条件、機器仕様・設定等により実績は変動します。',1060,yy,420,32,18,'500','#53666b')+12;
+    yy=wrapText(ctx,'正式なご提案時には、現地調査、機器仕様、設置条件、補助金の適用条件等を確認のうえ、最終見積をご案内いたします。',1060,yy,420,32,18,'500','#53666b');
+
+    roundedRect(ctx,90,935,1420,70,20,'#0a6b63');
+    drawText(ctx,'株式会社OMK　｜　太陽光発電・蓄電池・エコキュート',120,980,20,'700','#ffffff');
+    canvases.push(c);
+  }
+  return canvases;
+}
+async function printProposal(){
   calculate();
-  populateProposal();
-  const status=$('actionStatus'); if(status) status.textContent='提案書PDFを開きます…';
-  try{ window.print(); }
-  catch(e){ alert('印刷画面を開けませんでした。Safariの共有ボタンから「プリント」を選んでください。'); }
+  if(!window.jspdf || !window.jspdf.jsPDF){
+    alert('PDF生成機能の読み込みに失敗しました。通信状態を確認してページを再読み込みしてください。');
+    return;
+  }
+  const btn=document.getElementById('pdfBtn');
+  const old=btn.textContent; btn.textContent='PDF作成中…'; btn.disabled=true;
+  try{
+    const canvases=makeProposalCanvases();
+    const {jsPDF}=window.jspdf;
+    const pdf=new jsPDF({orientation:'landscape',unit:'mm',format:'a4',compress:true});
+    canvases.forEach((c,i)=>{
+      if(i>0) pdf.addPage('a4','landscape');
+      const img=c.toDataURL('image/jpeg',0.92);
+      pdf.addImage(img,'JPEG',0,0,297,210,undefined,'FAST');
+    });
+    const blob=pdf.output('blob');
+    const url=URL.createObjectURL(blob);
+    const w=window.open(url,'_blank');
+    if(!w){
+      const a=document.createElement('a');
+      a.href=url;a.download='OMK_導入効果ご提案書.pdf';document.body.appendChild(a);a.click();a.remove();
+    }
+    setTimeout(()=>URL.revokeObjectURL(url),60000);
+  }catch(e){
+    console.error(e);
+    alert('PDF生成中にエラーが発生しました。ページを再読み込みしてもう一度お試しください。');
+  }finally{
+    btn.textContent=old;btn.disabled=false;
+  }
 }
 window.addEventListener('DOMContentLoaded',()=>{
   const st=document.getElementById('jsStatus'); if(st) st.textContent='JavaScript動作中';
