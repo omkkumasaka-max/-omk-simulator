@@ -299,6 +299,7 @@
 
 <script>
 const yen=n=>Math.round(n).toLocaleString('ja-JP')+'円';
+const $=id=>document.getElementById(id);
 const kwh=n=>Math.round(n).toLocaleString('ja-JP')+' kWh';
 const get=id=>Number(document.getElementById(id).value)||0;
 function currentPattern(){return Number(document.querySelector('input[name=pattern]:checked').value)}
