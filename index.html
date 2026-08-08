@@ -26,6 +26,35 @@
   @media print{
     body{background:#fff}.no-print,.hero,.input-pane{display:none!important}.wrap{max-width:none;padding:0}.grid{display:block}.result-pane{display:block}.card{box-shadow:none;border:0;border-radius:0;padding:12mm;margin:0}.print-head{display:block;border-bottom:2px solid #111;padding-bottom:8px;margin-bottom:16px}.print-head h1{font-size:20px;margin:0}.print-head p{font-size:11px;color:#555}.metric{break-inside:avoid}.note{font-size:9px}
   }
+
+  #proposalPrint{display:none}
+  @media print{
+    body *{visibility:hidden!important}
+    #proposalPrint,#proposalPrint *{visibility:visible!important}
+    #proposalPrint{display:block!important;position:absolute;left:0;top:0;width:100%;background:#fff;color:#172033}
+    .proposal-page{width:210mm;min-height:297mm;padding:16mm 15mm;page-break-after:always;background:#fff}
+    .proposal-page:last-child{page-break-after:auto}
+    .p-logo{font-size:28px;font-weight:900;letter-spacing:.04em;color:#0f766e}
+    .p-sub{font-size:12px;color:#667085;margin-top:4px}
+    .p-cover{display:flex;flex-direction:column;justify-content:space-between}
+    .p-cover-main{padding-top:45mm}
+    .p-cover h1{font-size:30px;line-height:1.45;margin:0 0 10mm}
+    .p-cover .customer{font-size:22px;font-weight:800;margin-bottom:8mm}
+    .p-badge{display:inline-block;padding:6px 12px;border-radius:999px;background:#ecfdf5;color:#166534;font-weight:700;font-size:12px}
+    .p-footer{font-size:10px;color:#667085;border-top:1px solid #d0d5dd;padding-top:5mm}
+    .p-title{font-size:23px;font-weight:800;margin:0 0 9mm;border-left:6px solid #0f766e;padding-left:10px}
+    .p-lead{font-size:13px;line-height:1.8;color:#475467;margin-bottom:8mm}
+    .p-kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:5mm;margin:6mm 0 10mm}
+    .p-kpi{border:1px solid #d0d5dd;border-radius:12px;padding:6mm;background:#f8fafc}
+    .p-kpi small{font-size:10px;color:#667085}.p-kpi strong{display:block;font-size:24px;margin-top:2mm}
+    .p-highlight{border:2px solid #86efac;background:#f0fdf4;border-radius:14px;padding:7mm;margin:7mm 0}
+    .p-highlight small{font-size:11px;color:#166534}.p-highlight strong{display:block;font-size:30px;color:#166534;margin-top:2mm}
+    .p-table{width:100%;border-collapse:collapse;margin-top:5mm;font-size:11px}.p-table th,.p-table td{padding:3.4mm;border-bottom:1px solid #e5e7eb}.p-table th{text-align:left;background:#f8fafc}.p-table td:last-child{text-align:right;font-weight:700}
+    .p-section{margin-top:9mm}.p-section h3{font-size:15px;margin:0 0 4mm;color:#344054}
+    .p-note{font-size:9px;line-height:1.7;color:#667085}
+    .p-summary{font-size:15px;line-height:1.9;background:#f8fafc;border-radius:12px;padding:6mm;margin-top:7mm}
+  }
+
 </style>
 </head>
 <body>
@@ -148,6 +177,63 @@
     </div>
   </div>
 </div>
+
+<div id="proposalPrint">
+  <section class="proposal-page p-cover">
+    <div>
+      <div class="p-logo">OMK</div>
+      <div class="p-sub">太陽光・蓄電池 導入効果シミュレーション</div>
+    </div>
+    <div class="p-cover-main">
+      <div class="p-badge" id="pPatternBadge">導入プラン</div>
+      <h1>光熱費削減・導入効果<br>ご提案書</h1>
+      <div class="customer" id="pCustomer">お客様</div>
+      <div class="p-sub" id="pMeta">作成日</div>
+    </div>
+    <div class="p-footer">株式会社OMK　｜　本資料は簡易シミュレーションに基づくご提案書です。</div>
+  </section>
+
+  <section class="proposal-page">
+    <h2 class="p-title">1. 現在の光熱費と導入効果</h2>
+    <p class="p-lead">お客様から伺った電気料金・世帯人数・在宅状況等をもとに、導入後の年間電気代と経済効果を概算しています。</p>
+    <div class="p-kpi-grid">
+      <div class="p-kpi"><small>現在の年間電気代（推計）</small><strong id="pAnnualBill">-</strong></div>
+      <div class="p-kpi"><small>導入後の年間買電費（推計）</small><strong id="pAfterBill">-</strong></div>
+      <div class="p-kpi"><small>年間売電収入（推計）</small><strong id="pSellIncome">-</strong></div>
+      <div class="p-kpi"><small>投資回収目安</small><strong id="pPayback">-</strong></div>
+    </div>
+    <div class="p-highlight"><small>年間経済効果（概算）</small><strong id="pAnnualBenefit">-</strong></div>
+    <div class="p-summary" id="pSummaryText">導入効果の概要</div>
+  </section>
+
+  <section class="proposal-page">
+    <h2 class="p-title">2. 電力の使い方と長期効果</h2>
+    <div class="p-section"><h3>年間エネルギー内訳</h3>
+      <table class="p-table"><tbody>
+        <tr><th>年間電力使用量 推計</th><td id="pAnnualUse">-</td></tr>
+        <tr><th>太陽光年間発電量</th><td id="pGenOut">-</td></tr>
+        <tr><th>直接自家消費量</th><td id="pDirectUse">-</td></tr>
+        <tr><th>蓄電池経由の自家消費量</th><td id="pBatteryUse">-</td></tr>
+        <tr><th>エコキュート昼間活用量</th><td id="pEqUse">-</td></tr>
+        <tr><th>年間売電量</th><td id="pSellKwh">-</td></tr>
+      </tbody></table>
+    </div>
+    <div class="p-section"><h3>長期の累積経済効果</h3>
+      <table class="p-table"><thead><tr><th>期間</th><th style="text-align:right">累積経済効果</th><th style="text-align:right">実質導入費との差</th></tr></thead><tbody id="pLongRows"></tbody></table>
+    </div>
+  </section>
+
+  <section class="proposal-page">
+    <h2 class="p-title">3. シミュレーション条件</h2>
+    <div class="p-section"><div class="p-note" id="pConditions"></div></div>
+    <div class="p-section"><h3>ご確認事項</h3>
+      <p class="p-note">本シミュレーションは、お客様からご提供いただいた情報および標準的な電力使用モデルをもとに算出した概算です。実際の発電量・電気使用量・電気料金・売電収入・削減効果・投資回収期間を保証するものではありません。天候、機器仕様、生活パターン、電気料金プラン、売電条件、設備の運転設定等により実績は変動します。</p>
+      <p class="p-note">正式なご提案時には、現地調査、機器仕様、設置条件、補助金の適用条件等を確認のうえ、最終見積をご案内いたします。</p>
+    </div>
+    <div class="p-footer" style="margin-top:30mm">株式会社OMK　｜　太陽光発電・蓄電池・エコキュート</div>
+  </section>
+</div>
+
 <script>
 const yen=n=>Math.round(n).toLocaleString('ja-JP')+'円';
 const kwh=n=>Math.round(n).toLocaleString('ja-JP')+' kWh';
@@ -257,13 +343,24 @@ function calculate(){
  document.getElementById('printMeta').textContent=`${nm}　｜　担当：${st}　｜　${new Date().toLocaleDateString('ja-JP')}`;
 }
 function resetForm(){ location.reload(); }
+function populateProposal(){
+  const p=currentPattern();
+  const patNames={1:'太陽光のみ',2:'太陽光＋蓄電池',3:'太陽光＋蓄電池＋エコキュート昼間沸き上げ',4:'既設太陽光＋蓄電池',5:'既設太陽光＋蓄電池＋エコキュート交換'};
+  const copy=(from,to)=>{ const a=$(from),b=$(to); if(a&&b)b.innerHTML=a.innerHTML; };
+  $('pPatternBadge').textContent=patNames[p];
+  $('pCustomer').textContent=($('name').value||'お客様')+'　御中';
+  $('pMeta').textContent='作成日：'+new Date().toLocaleDateString('ja-JP')+'　担当：'+($('staff').value||'-');
+  copy('annualBill','pAnnualBill'); copy('afterBill','pAfterBill'); copy('sellIncome','pSellIncome'); copy('payback','pPayback');
+  copy('annualBenefit','pAnnualBenefit'); copy('annualUse','pAnnualUse'); copy('genOut','pGenOut'); copy('directUse','pDirectUse'); copy('batteryUse','pBatteryUse'); copy('eqUse','pEqUse'); copy('sellKwh','pSellKwh');
+  $('pLongRows').innerHTML=$('longRows').innerHTML;
+  $('pConditions').innerHTML=$('conditions').innerHTML;
+  $('pSummaryText').innerHTML=`今回の「${patNames[p]}」プランでは、年間経済効果は <strong>${$('annualBenefit').textContent}</strong>、投資回収目安は <strong>${$('payback').textContent}</strong> です。現在の年間電気代と導入後の買電費を比較し、長期的な家計負担の軽減効果を確認できます。`;
+}
 function printProposal(){
   calculate();
-  try{
-    window.print();
-  }catch(e){
-    alert('印刷画面を開けませんでした。Safariの共有ボタンから「プリント」を選び、印刷プレビューをピンチアウトしてPDFとして保存してください。');
-  }
+  populateProposal();
+  try{ window.print(); }
+  catch(e){ alert('印刷画面を開けませんでした。Safariの共有ボタンから「プリント」を選んでください。'); }
 }
 window.addEventListener('DOMContentLoaded',()=>{
   const st=document.getElementById('jsStatus'); if(st) st.textContent='JavaScript動作中';
