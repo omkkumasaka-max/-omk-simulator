@@ -1,0 +1,1829 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>OMK 太陽光・蓄電池 導入効果シミュレーター</title>
+<style>
+  :root{
+    --bg:#f6f8fb; --card:#fff; --text:#172033; --muted:#667085; --line:#e5e7eb;
+    --brand:#0f766e; --brand2:#14b8a6; --warn:#b45309; --good:#166534;
+  }
+  *{box-sizing:border-box} body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;background:var(--bg);color:var(--text)}
+  .wrap{max-width:1180px;margin:auto;padding:24px}.hero{background:linear-gradient(135deg,#0f766e,#115e59);color:#fff;padding:28px;border-radius:22px;margin-bottom:20px}
+  .hero h1{margin:0 0 6px;font-size:28px}.hero p{margin:0;opacity:.9}.grid{display:grid;grid-template-columns:1.08fr .92fr;gap:20px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px;box-shadow:0 8px 30px rgba(15,23,42,.05);margin-bottom:18px}
+  h2{font-size:18px;margin:0 0 16px} h3{font-size:15px;margin:18px 0 10px;color:#344054}.row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.row3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+  label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px} input,select{width:100%;padding:11px 12px;border:1px solid #d0d5dd;border-radius:10px;background:#fff;font-size:14px}.hint{font-size:11px;color:var(--muted);margin-top:5px}
+  .patterns{display:grid;grid-template-columns:1fr;gap:8px}.pat{display:flex;align-items:flex-start;gap:10px;padding:12px;border:1px solid var(--line);border-radius:12px;cursor:pointer}.pat input{width:auto;margin-top:3px}.pat strong{display:block;font-size:14px}.pat span{font-size:12px;color:var(--muted)}
+  .btns{display:flex;gap:10px;flex-wrap:wrap}.btn{position:relative;z-index:20;border:0;border-radius:12px;padding:14px 18px;font-weight:700;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:rgba(0,0,0,.08)}.primary{background:var(--brand);color:#fff}.secondary{background:#eef2f6;color:#24324a}.outline{background:#fff;border:1px solid var(--line)}
+  .metrics{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.metric{padding:14px;border-radius:14px;background:#f8fafc;border:1px solid var(--line)}.metric b{display:block;font-size:22px;margin-top:4px}.metric small{color:var(--muted)}
+  .big{padding:18px;border-radius:16px;background:#ecfdf5;border:1px solid #bbf7d0;margin:12px 0}.big .num{font-size:34px;font-weight:800;color:var(--good)}
+  table{width:100%;border-collapse:collapse;font-size:13px} th,td{padding:9px;border-bottom:1px solid var(--line);text-align:right} th:first-child,td:first-child{text-align:left}.note{font-size:11px;color:var(--muted);line-height:1.65}
+  .hidden{display:none!important}.checkline{display:flex;align-items:center;gap:8px;margin:10px 0}.checkline input{width:auto}.section-title{padding-top:4px;border-top:1px dashed var(--line);margin-top:18px}
+  .print-head{display:none}
+  @media(max-width:850px){.grid{grid-template-columns:1fr}.row,.row3{grid-template-columns:1fr}.metrics{grid-template-columns:1fr}}
+
+  /* ===== お客様向け提案書（A4横） ===== */
+  #proposalPrint{display:none}
+  @media print{
+    @page{size:A4 landscape;margin:0}
+    html,body{margin:0!important;padding:0!important;background:#fff!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+    body>.wrap{display:none!important}
+    #proposalPrint{display:block!important;position:static!important;width:297mm!important;margin:0!important;padding:0!important;background:#fff!important;color:#142128!important}
+    .proposal-page{
+      box-sizing:border-box!important;
+      width:286mm!important;
+      height:198mm!important;
+      min-height:198mm!important;
+      max-height:198mm!important;
+      margin:0 auto!important;
+      padding:9mm 12mm 18mm!important;
+      overflow:hidden!important;
+      position:relative!important;
+      background:#fff!important;
+      page-break-inside:avoid!important;
+      break-inside:avoid-page!important;
+      page-break-after:auto!important;
+      break-after:auto!important;
+    }
+    .proposal-page + .proposal-page{
+      page-break-before:always!important;
+      break-before:page!important;
+    }
+    .proposal-page:after{content:"";position:absolute;right:-18mm;top:-20mm;width:72mm;height:72mm;border-radius:50%;background:rgba(12,104,96,.055);z-index:0}
+    .proposal-page>*{position:relative;z-index:1}
+    .p-topbar{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #dbe6e4;padding-bottom:4mm;margin-bottom:7mm}
+    .p-brand{display:flex;align-items:baseline;gap:3mm}.p-logo{font-size:25px;font-weight:900;letter-spacing:.08em;color:#0b6b64}.p-brand-name{font-size:9px;font-weight:700;letter-spacing:.18em;color:#667b79}
+    .p-docmeta{font-size:9px;color:#6b7b80;text-align:right;line-height:1.6}
+    .p-eyebrow{font-size:10px;font-weight:800;letter-spacing:.12em;color:#0b6b64;text-transform:uppercase;margin-bottom:2.5mm}
+    .p-title{font-size:25px;line-height:1.25;font-weight:900;letter-spacing:.01em;margin:0;color:#142128}
+    .p-lead{font-size:10.5px;line-height:1.75;color:#5d6d73;margin:3mm 0 0}
+    .p-pill{display:inline-flex;align-items:center;padding:2.4mm 4mm;border-radius:999px;background:#eaf6f3;color:#09665e;font-size:10px;font-weight:800;margin-top:4mm}
+    .p-hero-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:7mm;margin-top:8mm}
+    .p-benefit{background:linear-gradient(135deg,#0a7269,#095b55);color:#fff;border-radius:7mm;padding:8mm 9mm;min-height:62mm;display:flex;flex-direction:column;justify-content:space-between;box-shadow:0 4mm 10mm rgba(9,91,85,.13)}
+    .p-benefit-label{font-size:10px;font-weight:700;color:#cdece7}.p-benefit-num{font-size:34px;line-height:1;font-weight:900;letter-spacing:-.02em;margin:2mm 0}.p-benefit-sub{font-size:10px;line-height:1.7;color:#e2f5f1}
+    .p-costbox{display:grid;grid-template-columns:1fr 1fr;gap:4mm}
+    .p-card{border:1px solid #dbe5e4;border-radius:5mm;padding:5mm;background:#fff;box-shadow:0 2mm 6mm rgba(27,61,58,.045)}
+    .p-card.accent{background:#f4faf8;border-color:#cce2de}
+    .p-card-label{font-size:9px;color:#6c7c81;margin-bottom:1.5mm}.p-card-num{font-size:19px;font-weight:900;color:#17252b;letter-spacing:-.02em}.p-card-note{font-size:8.3px;color:#7c8b8f;margin-top:1.5mm}
+    .p-flow{display:grid;grid-template-columns:1fr 14mm 1fr 14mm 1fr 14mm 1fr;align-items:center;margin-top:8mm;padding:5mm 6mm;border-radius:5mm;background:#f7faf9;border:1px solid #e1e9e7}
+    .p-flow-box{text-align:center}.p-flow-icon{width:12mm;height:12mm;border-radius:50%;background:#e3f1ee;margin:0 auto 2mm;display:flex;align-items:center;justify-content:center;font-size:16px}.p-flow-name{font-size:9px;font-weight:800;color:#33454b}.p-arrow{text-align:center;font-size:18px;color:#85a09c;font-weight:900}
+    .p-section-title{font-size:17px;font-weight:900;margin:0;color:#17252b}.p-section-sub{font-size:9.5px;color:#68787d;margin-top:1.5mm}
+    .p-section-head{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:5mm}
+    .p-kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:4mm;margin-bottom:7mm}
+    .p-kpi{border-radius:5mm;padding:5mm 5mm 4mm;background:#f8fbfa;border:1px solid #dce7e4}.p-kpi strong{display:block;font-size:18px;color:#17252b;margin-top:1mm}.p-kpi small{font-size:8.7px;color:#738388}
+    .p-two-col{display:grid;grid-template-columns:1fr 1fr;gap:7mm}
+    .p-panel{border:1px solid #dde6e4;border-radius:5mm;padding:5mm 6mm;background:#fff}.p-panel h3{font-size:11px;color:#33464a;margin:0 0 3mm;font-weight:900}
+    .p-table{width:100%;border-collapse:collapse;font-size:9px;margin:0}.p-table th,.p-table td{padding:2.5mm 1.5mm;border-bottom:1px solid #e8edec}.p-table th{text-align:left;color:#68797d;font-weight:600}.p-table td{text-align:right;color:#17252b;font-weight:800}
+    .p-timeline{display:grid;grid-template-columns:repeat(4,1fr);gap:4mm;margin-top:4mm}.p-year{border-radius:4mm;background:#f3f8f7;padding:4mm;text-align:center;border:1px solid #dce6e4}.p-year .year{font-size:9px;color:#68797d}.p-year .value{font-size:15px;font-weight:900;color:#0a6b63;margin-top:1mm}
+    .p-note-box{background:#f7faf9;border-left:4px solid #0b6b64;border-radius:3mm;padding:4mm 5mm;font-size:9.2px;line-height:1.75;color:#53666b}
+    .p-conditions{display:grid;grid-template-columns:1fr 1fr;gap:4mm 9mm;font-size:9.3px;line-height:1.7;color:#43565b}.p-conditions div{padding-bottom:2mm;border-bottom:1px solid #edf1f0}
+    .p-footer{position:absolute!important;left:14mm!important;right:14mm!important;bottom:7mm!important;display:flex;justify-content:space-between;border-top:1px solid #dfe7e5;padding-top:2.5mm;font-size:8px;color:#7a898d}
+    .p-page-no{font-weight:800;color:#54706b}
+  }
+
+    .p-footer{
+      position:absolute!important;left:12mm!important;right:12mm!important;bottom:6mm!important;
+      margin:0!important;page-break-inside:avoid!important;break-inside:avoid!important;
+    }
+    
+
+  @media print{
+    #proposalPrint{overflow:visible!important}
+    #proposalPrint .proposal-page:last-child{page-break-after:auto!important;break-after:auto!important}
+    a[href]::after{content:none!important}
+  }
+
+
+  /* ===== OMK PC最適化 ===== */
+  @media (min-width: 1000px){
+    body{background:#eef3f5}
+    .wrap{max-width:1440px;padding:28px 34px}
+    .hero{
+      padding:24px 30px;
+      border-radius:18px;
+      margin-bottom:18px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:24px;
+    }
+    .hero h1{font-size:26px}
+    .hero p{font-size:13px}
+    .grid{
+      grid-template-columns:minmax(0, 1.15fr) minmax(380px, .85fr);
+      gap:24px;
+      align-items:start;
+    }
+    .input-pane .card{padding:22px 24px}
+    .result-pane{
+      position:sticky;
+      top:20px;
+      max-height:calc(100vh - 40px);
+      overflow:auto;
+      padding-right:2px;
+    }
+    .result-pane .card{padding:22px}
+    .row{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .row3{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .patterns{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .pat{min-height:74px}
+    .btns{display:grid;grid-template-columns:1.2fr 1.2fr .8fr;gap:10px}
+    .btn{width:100%;font-size:15px;padding:14px 16px}
+    .metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .metric b{font-size:24px}
+    .big .num{font-size:38px}
+  }
+
+
+  /* ===== OMK WEB DESIGN 2026 / ENERGY WORKBENCH ===== */
+  @media screen {
+    :root{
+      --bg:#edf1f5;
+      --card:#ffffff;
+      --text:#172536;
+      --muted:#657386;
+      --line:#d6dee8;
+      --brand:#0b2545;
+      --brand2:#0f6cbd;
+      --warn:#a95c00;
+      --good:#16835b;
+    }
+
+    body{
+      background:
+        linear-gradient(180deg,#e8eef5 0,#f4f6f8 220px,#eef2f5 100%);
+      color:#172536;
+      letter-spacing:.01em;
+    }
+
+    .wrap{
+      max-width:1480px;
+      padding:0 30px 34px;
+    }
+
+    .hero{
+      margin:0 -30px 24px;
+      padding:0 34px;
+      min-height:82px;
+      border-radius:0;
+      border:0;
+      border-bottom:4px solid #0f6cbd;
+      background:#0b2545;
+      box-shadow:0 3px 14px rgba(16,34,55,.18);
+      display:grid;
+      grid-template-columns:auto 1fr auto;
+      grid-template-rows:auto auto;
+      align-content:center;
+      column-gap:22px;
+      color:#fff;
+    }
+    .hero:before{
+      content:"OMK";
+      grid-row:1 / span 2;
+      align-self:center;
+      font-size:28px;
+      line-height:1;
+      font-weight:900;
+      letter-spacing:.14em;
+      padding-right:22px;
+      border-right:1px solid rgba(255,255,255,.22);
+      color:#fff;
+    }
+    .hero h1{
+      grid-column:2;
+      margin:0;
+      font-size:20px;
+      line-height:1.25;
+      font-weight:800;
+      letter-spacing:.02em;
+    }
+    .hero p{
+      grid-column:2;
+      margin:5px 0 0;
+      font-size:11px;
+      opacity:.72;
+      letter-spacing:.08em;
+    }
+    .hero .no-print{
+      grid-column:3;
+      grid-row:1 / span 2;
+      align-self:center;
+      justify-self:end;
+      padding:7px 10px;
+      border:1px solid rgba(255,255,255,.28);
+      background:rgba(255,255,255,.06);
+      border-radius:3px!important;
+      font-size:10px!important;
+      font-weight:700!important;
+      letter-spacing:.08em;
+      opacity:1!important;
+    }
+
+    .grid{
+      gap:22px;
+      align-items:start;
+    }
+
+    .card{
+      border:1px solid #d6dee8;
+      border-radius:6px;
+      box-shadow:0 1px 2px rgba(16,32,50,.04);
+      padding:22px;
+      margin-bottom:16px;
+      background:#fff;
+    }
+
+    h2{
+      margin:0 -22px 20px;
+      padding:0 22px 13px;
+      border-bottom:1px solid #dce3eb;
+      font-size:15px;
+      font-weight:800;
+      letter-spacing:.02em;
+      color:#172536;
+    }
+    h2:before{
+      content:"";
+      display:inline-block;
+      width:4px;
+      height:16px;
+      margin-right:9px;
+      vertical-align:-3px;
+      background:#0f6cbd;
+    }
+    h3{
+      margin-top:20px;
+      color:#314156;
+      font-size:13px;
+      font-weight:800;
+    }
+
+    label{
+      font-size:11px;
+      font-weight:700;
+      color:#5e6d80;
+      letter-spacing:.02em;
+    }
+    input,select{
+      min-height:42px;
+      padding:9px 11px;
+      border:1px solid #bfcbd8;
+      border-radius:4px;
+      background:#fff;
+      color:#172536;
+      font-size:14px;
+      box-shadow:inset 0 1px 1px rgba(16,32,50,.025);
+      transition:border-color .15s,box-shadow .15s;
+    }
+    input:focus,select:focus{
+      outline:none;
+      border-color:#0f6cbd;
+      box-shadow:0 0 0 3px rgba(15,108,189,.12);
+    }
+
+    .hint{
+      color:#738195;
+      font-size:10.5px;
+    }
+
+    .patterns{
+      gap:8px;
+    }
+    .pat{
+      position:relative;
+      min-height:66px;
+      padding:11px 12px;
+      border:1px solid #cad4df;
+      border-radius:4px;
+      background:#fbfcfd;
+      transition:.15s ease;
+    }
+    .pat:hover{
+      border-color:#7aa9d2;
+      background:#f5f9fd;
+    }
+    .pat:has(input:checked){
+      border-color:#0f6cbd;
+      background:#eef6fc;
+      box-shadow:inset 4px 0 0 #0f6cbd;
+    }
+    .pat input{
+      accent-color:#0f6cbd;
+    }
+    .pat strong{
+      color:#1e3043;
+      font-size:13px;
+    }
+    .pat span{
+      color:#69798b;
+      font-size:10.5px;
+    }
+
+    .section-title{
+      border-top:1px solid #dde4eb;
+      padding-top:18px;
+    }
+
+    .btns{
+      gap:8px;
+    }
+    .btn{
+      border-radius:4px;
+      min-height:44px;
+      padding:11px 16px;
+      font-size:13px;
+      font-weight:800;
+      letter-spacing:.02em;
+      box-shadow:none;
+    }
+    .primary{
+      background:#0f6cbd;
+      color:#fff;
+    }
+    .primary:hover{background:#0b5a9e}
+    .secondary{
+      background:#0b2545;
+      color:#fff;
+    }
+    .secondary:hover{background:#071b32}
+    .outline{
+      background:#fff;
+      color:#46576a;
+      border:1px solid #bfcbd8;
+    }
+
+    .result-pane .card{
+      border-top:4px solid #0f6cbd;
+      box-shadow:0 2px 7px rgba(16,32,50,.08);
+    }
+    .result-pane h2{
+      color:#0b2545;
+    }
+
+    .big{
+      position:relative;
+      overflow:hidden;
+      margin:0 0 14px;
+      padding:18px 20px;
+      border:0;
+      border-radius:4px;
+      background:#0b2545;
+      color:#fff;
+    }
+    .big:after{
+      content:"";
+      position:absolute;
+      width:150px;
+      height:150px;
+      right:-55px;
+      top:-55px;
+      border-radius:50%;
+      background:rgba(15,108,189,.28);
+    }
+    .big small{
+      position:relative;
+      z-index:1;
+      color:#bbcad8;
+      font-weight:700;
+      letter-spacing:.04em;
+    }
+    .big .num{
+      position:relative;
+      z-index:1;
+      margin-top:5px;
+      color:#fff;
+      font-size:36px;
+      font-weight:900;
+      letter-spacing:-.02em;
+    }
+
+    .metrics{
+      gap:8px;
+    }
+    .metric{
+      min-height:82px;
+      padding:13px 14px;
+      border:1px solid #d5dee7;
+      border-radius:4px;
+      background:#f7f9fb;
+    }
+    .metric small{
+      color:#667789;
+      font-size:10px;
+      font-weight:700;
+    }
+    .metric b{
+      margin-top:5px;
+      font-size:22px;
+      color:#172536;
+    }
+
+    table{
+      border:1px solid #dce3ea;
+      font-size:12px;
+    }
+    th,td{
+      padding:9px 10px;
+      border-bottom:1px solid #e3e8ee;
+    }
+    thead th{
+      background:#eef3f7;
+      color:#4b5c70;
+      font-size:10.5px;
+      font-weight:800;
+    }
+    tbody tr:nth-child(even){
+      background:#fafbfc;
+    }
+
+    .checkline{
+      padding:10px 12px;
+      border:1px solid #dce3ea;
+      border-radius:4px;
+      background:#f8fafc;
+    }
+    .checkline input{
+      min-height:auto;
+      accent-color:#0f6cbd;
+    }
+  }
+
+  @media screen and (min-width:1000px){
+    .wrap{padding-top:0}
+    .grid{
+      grid-template-columns:minmax(0,1.18fr) minmax(420px,.82fr);
+    }
+    .result-pane{
+      top:18px;
+      max-height:calc(100vh - 36px);
+    }
+    .patterns{
+      grid-template-columns:repeat(2,minmax(0,1fr));
+    }
+  }
+
+  @media screen and (max-width:850px){
+    .wrap{padding:0 14px 22px}
+    .hero{
+      margin:0 -14px 16px;
+      padding:14px;
+      min-height:auto;
+      grid-template-columns:auto 1fr;
+      grid-template-rows:auto auto;
+      column-gap:12px;
+    }
+    .hero:before{
+      font-size:20px;
+      padding-right:12px;
+    }
+    .hero h1{
+      font-size:15px;
+    }
+    .hero p{
+      font-size:9px;
+    }
+    .hero .no-print{
+      display:none;
+    }
+    .card{
+      padding:16px;
+      border-radius:5px;
+    }
+    h2{
+      margin:0 -16px 16px;
+      padding:0 16px 11px;
+    }
+    .patterns{
+      grid-template-columns:1fr;
+    }
+    .btns{
+      display:grid;
+      grid-template-columns:1fr;
+    }
+  }
+
+
+/* ===== 本格版統合プロトタイプ ===== */
+.mode-switch{
+  display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;
+}
+.mode-btn{
+  appearance:none;border:1px solid #bfcbd8;background:#fff;color:#415268;
+  border-radius:4px;padding:10px 16px;font-weight:800;cursor:pointer;
+}
+.mode-btn.active{background:#0b2545;color:#fff;border-color:#0b2545}
+.advanced-section{display:none}
+.advanced-section.active{display:block}
+.prototype-badge{
+  display:inline-flex;align-items:center;gap:6px;padding:5px 9px;border-radius:3px;
+  background:#fff4dc;color:#875300;border:1px solid #efd49a;font-size:10px;font-weight:800;
+}
+.monthly-wrap{overflow:auto;border:1px solid #d6dee8}
+.monthly-table{min-width:980px;border:0}
+.monthly-table input{min-width:88px;height:36px;padding:6px 8px}
+.monthly-table th{white-space:nowrap}
+.monthly-total{
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:12px;
+}
+.upload-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.upload-box{
+  border:1px dashed #9fb2c6;background:#f8fafc;padding:14px;border-radius:5px;
+}
+.upload-box strong{display:block;font-size:12px;margin-bottom:6px;color:#314156}
+.upload-box input{border:0;padding:0;min-height:auto;background:transparent}
+.analysis-result{
+  margin-top:14px;border-left:4px solid #0f6cbd;background:#f3f7fb;padding:14px 16px;
+}
+.roof-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:12px}
+.roof-item{border:1px solid #d6dee8;background:#fff;padding:10px}
+.roof-item small{display:block;color:#657386;font-size:10px}
+.roof-item b{display:block;margin-top:4px;font-size:16px}
+.maker-compare{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:14px}
+.maker-card{border:1px solid #d6dee8;background:#fff;padding:14px;position:relative}
+.maker-card.best{border:2px solid #0f6cbd}
+.rank{
+  position:absolute;right:10px;top:10px;font-size:10px;font-weight:900;
+  padding:4px 7px;background:#e9f3fb;color:#0f6cbd;border-radius:3px
+}
+.maker-card h4{margin:0 0 10px;color:#0b2545}
+.maker-card .cap{font-size:26px;font-weight:900;color:#0f6cbd}
+.floorplan-placeholder{
+  min-height:240px;border:1px solid #d6dee8;background:
+  linear-gradient(90deg,rgba(15,108,189,.04) 1px,transparent 1px),
+  linear-gradient(rgba(15,108,189,.04) 1px,transparent 1px);
+  background-size:20px 20px;display:flex;align-items:center;justify-content:center;
+  color:#77879a;font-weight:800;margin-top:12px;text-align:center;padding:20px;
+}
+@media(max-width:850px){
+  .monthly-total,.roof-grid,.maker-compare,.upload-grid{grid-template-columns:1fr}
+}
+.catalog-spec{margin-top:10px;padding:10px 12px;border-left:4px solid #0f6cbd;background:#f4f8fc;color:#53657a;font-size:11px;line-height:1.65}
+.catalog-spec.warn{border-left-color:#b45309;background:#fff8ed;color:#7c4a08}
+select.catalog-filled,input.catalog-filled{background:#f4f9fd}
+
+
+
+/* ===== PDF出力レイアウト安定化 2026-08-10 =====
+   Chrome / Edge / Safari系の「PDFに保存」でA4横3ページを安定させるための最終上書き */
+@media print {
+  @page {
+    size: 297mm 210mm;
+    margin: 0;
+  }
+
+  html, body {
+    width: 297mm !important;
+    min-width: 297mm !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    background: #fff !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  body > .wrap {
+    display: none !important;
+  }
+
+  #proposalPrint {
+    display: block !important;
+    position: static !important;
+    width: 297mm !important;
+    min-width: 297mm !important;
+    max-width: 297mm !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    background: #fff !important;
+  }
+
+  #proposalPrint .proposal-page {
+    box-sizing: border-box !important;
+    position: relative !important;
+    display: block !important;
+    width: 297mm !important;
+    min-width: 297mm !important;
+    max-width: 297mm !important;
+    height: 210mm !important;
+    min-height: 210mm !important;
+    max-height: 210mm !important;
+    margin: 0 !important;
+    padding: 9mm 12mm 18mm !important;
+    overflow: hidden !important;
+    background: #fff !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid-page !important;
+    page-break-after: always !important;
+    break-after: page !important;
+  }
+
+  #proposalPrint .proposal-page:last-child {
+    page-break-after: auto !important;
+    break-after: auto !important;
+  }
+
+  #proposalPrint .proposal-page + .proposal-page {
+    page-break-before: auto !important;
+    break-before: auto !important;
+  }
+
+  #proposalPrint .p-footer {
+    position: absolute !important;
+    left: 12mm !important;
+    right: 12mm !important;
+    bottom: 6mm !important;
+    margin: 0 !important;
+    padding-top: 2.5mm !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  #proposalPrint .p-topbar,
+  #proposalPrint .p-hero-grid,
+  #proposalPrint .p-flow,
+  #proposalPrint .p-kpi-row,
+  #proposalPrint .p-two-col,
+  #proposalPrint .p-panel,
+  #proposalPrint .p-note-box {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+}
+
+
+
+/* ===== 自動機器選定アシスト ===== */
+.design-assist{margin-top:14px;padding:14px;border:1px solid #cbd8e6;background:#f8fbff;border-radius:5px}
+.design-assist-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.design-assist-head strong{font-size:13px;color:#0b2545}
+.design-assist-note{margin-top:6px;font-size:10.5px;line-height:1.65;color:#657386}
+.candidate-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:12px}
+.candidate-card{border:1px solid #d4dfeb;background:#fff;padding:12px;border-radius:4px}
+.candidate-card.best{border:2px solid #0f6cbd;background:#f7fbff}
+.candidate-card h4{margin:0 0 6px;font-size:12px;color:#172536}
+.candidate-card .candidate-kpi{font-size:20px;font-weight:900;color:#0f6cbd;margin:3px 0}
+.candidate-card .candidate-meta{font-size:10.5px;line-height:1.6;color:#5f7083}
+.candidate-card .candidate-badge{display:inline-block;margin-bottom:6px;padding:3px 6px;background:#e9f3fb;color:#0f6cbd;font-size:9px;font-weight:900;border-radius:3px}
+.candidate-card .candidate-badge.ref{background:#fff4dc;color:#875300}
+.candidate-card button{margin-top:8px;width:100%}
+.compat-status{margin-top:8px;padding:9px 10px;border-left:3px solid #0f6cbd;background:#f4f8fc;font-size:10.5px;line-height:1.6;color:#526579}
+.compat-status.warn{border-left-color:#b45309;background:#fff8eb;color:#7a4a08}
+.auto-selected{box-shadow:0 0 0 3px rgba(15,108,189,.10)!important}
+@media(max-width:850px){.candidate-grid{grid-template-columns:1fr}}
+
+
+/* ===== 実配置レイアウト / 300mm離隔 ===== */
+.layout-settings{margin-top:14px;padding:12px;border:1px solid #d6dee8;background:#fbfcfd;border-radius:5px}
+.layout-preview{margin-top:12px;border:1px solid #cbd6e1;background:#f5f8fb;padding:12px;border-radius:5px;overflow:auto}
+.layout-preview svg{display:block;width:100%;min-width:520px;height:auto;background:#fff}
+.layout-legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:8px;font-size:10px;color:#607184}
+.layout-chip{display:inline-flex;align-items:center;gap:5px}
+.layout-swatch{width:14px;height:10px;border:1px solid #6f8194;background:#eaf2f8}
+.layout-swatch.safe{background:#fff;border:1px dashed #b45309}
+.layout-result-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:10px}
+.layout-result-grid .metric{min-height:68px}
+@media(max-width:850px){.layout-result-grid{grid-template-columns:1fr 1fr}}
+.external-pcs-box{margin-top:12px;padding:12px;border:1px solid #d6dee8;background:#fafcff;border-radius:5px}
+.external-pcs-box .hint{margin-top:6px}
+
+</style>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+</head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <h1>OMK 太陽光・蓄電池 導入効果シミュレーター</h1>
+    <p>簡易シミュレーション＋詳細分析＋図面AIレイアウト 統合プロトタイプ</p>
+    <div class="no-print" style="font-size:12px;font-weight:800;opacity:.9">株式会社OMK 専用</div>
+  </div>
+  <div class="grid">
+    <div class="input-pane">
+      <div class="card">
+        <h2>1. お客様情報</h2>
+        <div class="row">
+          <div><label>お客様名</label><input id="name" placeholder="例：熊坂 様"></div>
+          <div><label>担当者</label><input id="staff" placeholder="例：熊坂"></div>
+          <div><label>エネルギー種別</label><select id="energy"><option value="all">オール電化</option><option value="gas">ガス併用</option></select></div>
+          <div><label>世帯人数</label><input id="family" type="number" min="1" value="4"></div>
+          <div><label>昼間在宅人数</label><input id="dayPeople" type="number" min="0" value="1"></div>
+          <div><label>ガス代（月平均・任意）</label><input id="gasBill" type="number" min="0" value="0"></div>
+          <div><label>夏場の電気代（月）</label><input id="summerBill" type="number" min="0" value="18000"></div>
+          <div><label>冬場の電気代（月）</label><input id="winterBill" type="number" min="0" value="35000"></div>
+        </div>
+      </div>
+
+
+      <div class="card no-print">
+        <h2>入力モード</h2>
+        <div class="mode-switch">
+          <button type="button" class="mode-btn active" data-mode="simple">簡易モード</button>
+          <button type="button" class="mode-btn" data-mode="detail">詳細モード（12か月実績）</button>
+          <button type="button" class="mode-btn" data-mode="drawing">図面AI・パネル比較</button>
+        </div>
+        <div class="hint">簡易モードは今まで通りすぐ試算できます。詳細データや図面がある案件だけ、追加機能を使います。</div>
+      </div>
+
+      <div id="detailMode" class="card advanced-section no-print">
+        <h2>詳細モード｜電力会社・12か月実績 <span class="prototype-badge">PROTOTYPE</span></h2>
+        <div class="row3">
+          <div><label>電力会社</label><select id="powerCompany"><option>東北電力</option><option>東京電力</option><option>北海道電力</option><option>中部電力</option><option>関西電力</option><option>その他</option></select></div>
+          <div><label>料金プラン</label><input id="powerPlan" placeholder="例：よりそう＋スマートタイム"></div>
+          <div><label>契約容量</label><input id="contractCapacity" placeholder="例：10kVA"></div>
+          <div><label>基本料金（月・円）</label><input id="baseCharge" type="number" value="0"></div>
+          <div><label>燃料費調整単価（任意・円/kWh）</label><input id="fuelAdj" type="number" step="0.01" value="0"></div>
+          <div><label>再エネ賦課金（任意・円/kWh）</label><input id="renewLevy" type="number" step="0.01" value="0"></div>
+        </div>
+        <h3>1月〜12月の実績入力</h3>
+        <div class="monthly-wrap">
+          <table class="monthly-table">
+            <thead><tr><th>月</th><th>買電料金 円</th><th>買電量 kWh</th><th>昼間使用量 kWh</th><th>夜間使用量 kWh</th><th>売電料金 円</th><th>売電量 kWh</th></tr></thead>
+            <tbody id="monthlyRows"></tbody>
+          </table>
+        </div>
+        <div class="monthly-total">
+          <div class="metric"><small>年間買電料金</small><b id="detailBuyYen">0円</b></div>
+          <div class="metric"><small>年間買電量</small><b id="detailBuyKwh">0 kWh</b></div>
+          <div class="metric"><small>年間売電料金</small><b id="detailSellYen">0円</b></div>
+          <div class="metric"><small>年間売電量</small><b id="detailSellKwh">0 kWh</b></div>
+        </div>
+        <div class="btns" style="margin-top:12px">
+          <button type="button" class="btn primary" id="applyDetailBtn">12か月実績をシミュレーションへ反映</button>
+        </div>
+      </div>
+
+      <div id="drawingMode" class="card advanced-section no-print">
+        <h2>図面AI・パネルレイアウト比較 <span class="prototype-badge">AI接続前の画面モック</span></h2>
+        <p class="hint">図面の写メでも、記載寸法を優先して屋根形状を再構築する想定です。1階平面図＋立面図を基本セットにします。</p>
+        <div class="upload-grid">
+          <div class="upload-box"><strong>① 1階平面図（必須）</strong><input id="floorPlanFile" type="file" accept="image/*,.pdf"></div>
+          <div class="upload-box"><strong>② 立面図（必須・複数可）</strong><input id="elevationFile" type="file" accept="image/*,.pdf" multiple></div>
+          <div class="upload-box"><strong>③ 屋根伏図（あれば）</strong><input id="roofPlanFile" type="file" accept="image/*,.pdf"></div>
+          <div class="upload-box"><strong>④ その他図面・現場写真</strong><input id="otherPlanFile" type="file" accept="image/*,.pdf" multiple></div>
+        </div>
+        <div class="row3" style="margin-top:14px">
+          <div><label>建物所在地</label><input id="siteAddress" placeholder="例：宮城県名取市"></div>
+          <div><label>方位（分かれば）</label><select id="roofAzimuth"><option>図面からAI判定</option><option>南</option><option>南東</option><option>南西</option><option>東</option><option>西</option></select></div>
+          <div><label>屋根勾配（分かれば）</label><input id="roofPitch" placeholder="例：4寸"></div>
+        </div>
+        <div class="layout-settings">
+          <strong style="font-size:12px">太陽光レイアウト条件</strong>
+          <div class="row3" style="margin-top:10px">
+            <div><label>配置対象屋根 幅（mm）</label><input id="layoutRoofW" type="number" min="1000" value="9100"></div>
+            <div><label>配置対象屋根 奥行（mm）</label><input id="layoutRoofH" type="number" min="1000" value="7280"></div>
+            <div><label>屋根外周離隔（mm）</label><input id="layoutSetback" type="number" min="300" value="300"></div>
+            <div><label>パネル間隔（mm）</label><input id="layoutGap" type="number" min="0" value="20"></div>
+            <div><label>屋根形状</label><select id="layoutRoofType"><option value="rect">矩形面</option><option value="gable">切妻（片面を矩形として計算）</option></select></div>
+            <div><label>配置方向</label><select id="layoutOrientation"><option value="auto">自動（最大枚数）</option><option value="portrait">縦置き</option><option value="landscape">横置き</option></select></div>
+          </div>
+          <div class="hint"><strong>屋根外周から300mm未満には配置しません。</strong> 300mm未満を入力しても自動的に300mmへ補正します。現在のHTML単体版では図面PDFから寸法を自動読取するAIは未接続のため、図面記載寸法をここへ入力して配置計算します。</div>
+        </div>
+        <div class="btns" style="margin-top:12px">
+          <button type="button" class="btn primary" id="analyzeDrawingBtn">太陽光レイアウト作成</button>
+        </div>
+        <div id="drawingAnalysis" class="analysis-result hidden">
+          <strong>太陽光レイアウト計算結果</strong>
+          <div class="layout-result-grid">
+            <div class="metric"><small>外周離隔</small><b id="layoutResultSetback">300 mm</b></div>
+            <div class="metric"><small>配置可能枚数</small><b id="layoutResultCount">-</b></div>
+            <div class="metric"><small>太陽光容量</small><b id="layoutResultKw">-</b></div>
+            <div class="metric"><small>配置方向</small><b id="layoutResultOrient">-</b></div>
+          </div>
+          <div id="layoutPreview" class="layout-preview"></div>
+          <div class="layout-legend">
+            <span class="layout-chip"><span class="layout-swatch"></span>太陽光パネル</span>
+            <span class="layout-chip"><span class="layout-swatch safe"></span>300mm以上の離隔範囲</span>
+          </div>
+          <div class="btns" style="margin-top:12px"><button type="button" class="btn primary" id="adoptLayoutBtn">このレイアウトを採用</button></div>
+          <div id="layoutNote" class="hint" style="margin-top:8px"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>2. 導入パターン</h2>
+        <div class="patterns">
+          <label class="pat"><input type="radio" name="pattern" value="1" checked><div><strong>① 太陽光のみ</strong><span>新規太陽光を設置</span></div></label>
+          <label class="pat"><input type="radio" name="pattern" value="2"><div><strong>② 太陽光＋蓄電池</strong><span>新規太陽光と蓄電池を同時導入</span></div></label>
+          <label class="pat"><input type="radio" name="pattern" value="3"><div><strong>③ 太陽光＋蓄電池＋エコキュート昼間沸き上げ</strong><span>太陽光余剰を給湯にも活用</span></div></label>
+          <label class="pat"><input type="radio" name="pattern" value="4"><div><strong>④ 既設太陽光＋蓄電池</strong><span>既設太陽光はそのまま、蓄電池のみ新設</span></div></label>
+          <label class="pat"><input type="radio" name="pattern" value="5"><div><strong>⑤ 既設太陽光＋蓄電池＋エコキュート交換</strong><span>既設太陽光はそのまま、蓄電池とエコキュートのみ追加</span></div></label>
+          <label class="pat"><input type="radio" name="pattern" value="6"><div><strong>⑥ 既設太陽光＋太陽光増設＋蓄電池</strong><span>既設太陽光に新しい太陽光を増設し、蓄電池も導入</span></div></label>
+          <label class="pat"><input type="radio" name="pattern" value="7"><div><strong>⑦ 産業用・自家消費型太陽光</strong><span>工場・倉庫・事務所などで昼間の電力を太陽光でまかなう</span></div></label>
+        </div>
+      </div>
+
+      <div id="industrialBox" class="card hidden">
+        <h2>産業用・自家消費条件</h2>
+        <div class="row3">
+          <div><label>年間使用電力量（kWh）</label><input id="industrialAnnualUse" type="number" min="0" value="120000"></div>
+          <div><label>昼間使用率（%）</label><input id="industrialDayShare" type="number" min="0" max="100" value="75"></div>
+          <div><label>年間電気料金（円・任意）</label><input id="industrialAnnualBill" type="number" min="0" value="0"></div>
+        </div>
+        <div class="row" style="margin-top:12px">
+          <div><label>年間稼働日数（参考）</label><input id="industrialDays" type="number" min="1" max="366" value="300"></div>
+          <div><label>用途・施設名（任意）</label><input id="industrialUseType" placeholder="例：工場、倉庫、事務所、店舗"></div>
+        </div>
+        <div class="hint">年間電気料金が未入力の場合は「年間使用電力量 × 買電単価」で概算します。昼間使用率は、太陽光が発電する時間帯に消費する電力の割合として使用します。</div>
+      </div>
+
+      <div class="card">
+        <h2>3. 設備・価格情報</h2><div class="hint" style="margin:-8px 0 14px">アップロードされたメーカー4カタログの製品仕様を内蔵しています。メーカー・型式選択で仕様を自動反映し、手入力にも切替できます。</div>
+        <div id="newSolarBox">
+          <h3 id="newSolarHeading">新規太陽光</h3>
+          <div class="row">
+            <div><label>パネルメーカー</label><select id="panelMaker"></select></div>
+            <div><label>パネル型式</label><select id="panelModel"></select></div>
+            <div><label>1枚あたり出力（W）</label><input id="panelW" type="number" step="1" value="0"></div>
+            <div><label>パネル枚数</label><input id="panelCount" type="number" min="1" step="1" value="1"></div>
+            <div><label>太陽光容量（kW）</label><input id="solarKw" type="number" step="0.01" value="6.0"></div>
+            <div><label>年間予測発電量（kWh）</label><input id="annualGen" type="number" value="6500"></div>
+            <div><label>FIT開始年度</label><input id="fitStartYear" type="number" value="2026"></div>
+            <div><label>卒FIT単価（任意・円/kWh）</label><input id="postFitUnit" type="number" step="0.1" value="10"></div>
+          </div>
+          <div id="panelSpec" class="catalog-spec">カタログ製品を選択すると、出力・仕様を自動反映します。</div>
+        </div>
+        <div id="pcsBox">
+          <h3>パワーコンディショナ</h3>
+          <div class="row3">
+            <div><label>パワコンメーカー</label><select id="pcsMaker"></select></div>
+            <div><label>パワコン型式</label><select id="pcsModel"></select></div>
+            <div><label>1台あたり定格出力（kW）</label><input id="pcsUnitKw" type="number" step="0.01" value="0"></div>
+            <div><label>パワコン台数</label><input id="pcsCount" type="number" min="1" step="1" value="1"></div>
+            <div><label>パワコン合計出力（kW）</label><input id="pcsTotalKw" type="number" step="0.01" value="0" readonly></div>
+            <div><label>DC/AC比・過積載率</label><input id="dcAcRatio" type="text" value="-" readonly></div>
+          </div>
+          <div id="pcsSpec" class="catalog-spec">パワコン型式を選択すると定格出力を自動反映します。年間予測発電量は発電シミュレーション等で算出した値を入力してください。</div>
+          <div class="design-assist" id="designAssist">
+            <div class="design-assist-head">
+              <strong>機器構成 自動候補</strong>
+              <button type="button" class="btn outline" id="refreshDesignBtn" style="min-height:34px;padding:7px 11px;font-size:11px">候補を再計算</button>
+            </div>
+            <div class="design-assist-note">パネル型式・枚数から太陽光容量を計算し、カタログに最大PV入力値があるパワコンはその上限を使って適合候補を判定します。最大PV入力値がマスタ未登録の機種は、定格出力以上となる保守的な台数で「参考候補」として表示します。</div>
+            <div id="designCandidateStatus" class="compat-status">パネル型式と枚数を入力すると候補を表示します。</div>
+            <div id="pcsCandidateGrid" class="candidate-grid"></div>
+          </div>
+        </div>
+        <div id="existingSolarBox" class="hidden">
+          <h3>既設太陽光</h3>
+          <div id="existingSolarHint" class="hint" style="margin-bottom:10px">④・⑤では既設太陽光の条件だけを使用し、新規太陽光の発電量は加算しません。</div>
+          <div class="row3">
+            <div><label>既設容量（kW・任意）</label><input id="existKw" type="number" step="0.1" value="5.0"></div>
+            <div><label>年間売電金額（円）</label><input id="annualSellYen" type="number" value="120000"></div>
+            <div><label>売電単価（円/kWh）</label><input id="sellUnitExisting" type="number" step="0.1" value="16"></div>
+          </div>
+          <div class="external-pcs-box">
+            <strong style="font-size:12px">パワーコンディショナ 2台目（太陽光外部発電用）</strong>
+            <div class="row" style="margin-top:9px">
+              <div><label>外部発電用パワコン容量（kW）</label><input id="externalPcsKw" type="number" min="0" step="0.1" value="0"></div>
+              <div><label>パワコン合計出力（参考・kW）</label><input id="combinedPcsKw" type="number" value="0" readonly></div>
+            </div>
+            <div class="hint">既設太陽光を外部発電として接続する場合の2台目パワコン容量です。シミュレーション条件・PDF提案書・合計PCS容量に反映します。年間発電量そのものは、年間売電実績等から推計するため、この容量だけで年間kWhを増減させません。</div>
+          </div>
+        </div>
+        <div id="batteryBox" class="hidden">
+          <h3>蓄電池</h3>
+          <div class="row">
+            <div><label>蓄電池メーカー</label><select id="batteryMaker"></select></div>
+            <div><label>蓄電池型式・構成</label><select id="batteryModel"></select></div>
+            <div><label>蓄電池容量（kWh）</label><input id="batteryKwh" type="number" step="0.1" value="12.7"></div>
+          </div>
+          <div id="batterySpec" class="catalog-spec">カタログ製品を選択すると容量を自動反映します。</div>
+          <div id="batteryCompatStatus" class="compat-status">パワコンを選択すると、カタログで組合せを確認できる蓄電池候補に絞り込みます。</div>
+        </div>
+        <div id="eqBox" class="hidden">
+          <h3>エコキュート</h3>
+          <div class="row">
+            <div><label>タンク容量</label><select id="eqTank"><option value="370">370L</option><option value="460" selected>460L</option></select></div>
+            <div><label>昼間移行率（%）</label><input id="eqShift" type="number" value="75"></div>
+          </div>
+        </div>
+        <h3 class="section-title">価格</h3>
+        <div class="row">
+          <div><label>設備・工事価格（税込・円）</label><input id="price" type="number" value="2500000"></div>
+          <div><label>補助金（円）</label><input id="subsidy" type="number" value="500000"></div>
+          <div><label>買電単価（円/kWh）</label><input id="buyUnit" type="number" step="0.1" value="35"></div>
+          <div><label>新規太陽光の売電単価（円/kWh）</label><input id="sellUnitNew" type="number" step="0.1" value="15"></div>
+        </div>
+        <h3 class="section-title">詳細設定（任意）</h3>
+        <div class="checkline"><input id="useDegrade" type="checkbox"><label for="useDegrade" style="margin:0">太陽光パネルの経年劣化を考慮する</label></div>
+        <div class="row">
+          <div><label>年間劣化率（%）</label><input id="degrade" type="number" step="0.01" value="0.3" disabled></div>
+          <div><label>電気料金上昇率（%/年）</label><input id="priceRise" type="number" step="0.1" value="0"></div>
+        </div>
+        <div class="hint">初期計算では太陽光劣化率0%、電気料金上昇率0%として使用できます。</div>
+      </div>
+
+      <div class="card no-print">
+        <div class="btns">
+          <button type="button" id="calcBtn" class="btn primary" >シミュレーション実行</button>
+          <button type="button" id="pdfBtn" class="btn secondary" >提案書PDF出力</button>
+          <button type="button" id="resetBtn" class="btn outline" >初期値に戻す</button>
+        </div>
+        <div id="actionStatus" class="hint" style="margin-top:10px;font-weight:700;color:#0f766e"></div>
+      </div>
+    </div>
+
+    <div class="result-pane">
+      <div class="card" id="resultCard">
+        <div class="print-head"><h1>OMK 導入効果シミュレーション</h1><p id="printMeta"></p></div>
+        <h2>シミュレーション結果</h2>
+        <div class="big"><small>年間経済効果（概算）</small><div class="num" id="annualBenefit">-</div></div>
+        <div class="metrics">
+          <div class="metric"><small>現在の年間電気代 推計</small><b id="annualBill">-</b></div>
+          <div class="metric"><small>導入後の年間買電費 推計</small><b id="afterBill">-</b></div>
+          <div class="metric"><small>年間売電収入 推計</small><b id="sellIncome">-</b></div>
+          <div class="metric"><small>投資回収目安</small><b id="payback">-</b></div>
+        </div>
+        <h3>エネルギー内訳</h3>
+        <table>
+          <tbody>
+            <tr><td>年間電力使用量 推計</td><td id="annualUse">-</td></tr>
+            <tr><td>太陽光年間発電量</td><td id="genOut">-</td></tr>
+            <tr><td>直接自家消費量</td><td id="directUse">-</td></tr>
+            <tr><td>蓄電池経由の自家消費量</td><td id="batteryUse">-</td></tr>
+            <tr><td>エコキュート昼間活用量</td><td id="eqUse">-</td></tr>
+            <tr><td>年間売電量</td><td id="sellKwh">-</td></tr>
+            <tr><td>推定自家消費率</td><td id="selfConsumptionRate">-</td></tr>
+          </tbody>
+        </table>
+        <h3>長期試算</h3>
+        <table><thead><tr><th>期間</th><th>累積経済効果</th><th>実質導入費との差</th></tr></thead><tbody id="longRows"></tbody></table>
+        <h3>計算条件</h3>
+        <div class="note" id="conditions"></div>
+        <p class="note" style="margin-top:14px">※本シミュレーションは、お客様から提供された情報および標準的な想定条件に基づく概算です。実際の発電量、使用量、売電収入、電気料金、削減効果等を保証するものではありません。正式提案時は機器仕様、電力契約、設置条件等をご確認ください。</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="proposalPrint">
+  <!-- 1ページ目：提案サマリー -->
+  <section class="proposal-page">
+    <div class="p-topbar">
+      <div class="p-brand"><div class="p-logo">OMK</div><div class="p-brand-name">ENERGY SOLUTION</div></div>
+      <div class="p-docmeta" id="pMeta">作成日・担当</div>
+    </div>
+    <div class="p-eyebrow">ENERGY COST OPTIMIZATION PLAN</div>
+    <h1 class="p-title"><span id="pCustomer">お客様</span><br>太陽光・蓄電池 導入効果ご提案</h1>
+    <div class="p-pill" id="pPatternBadge">導入プラン</div>
+
+    <div class="p-hero-grid">
+      <div class="p-benefit">
+        <div><div class="p-benefit-label">年間経済効果（概算）</div><div class="p-benefit-num" id="pAnnualBenefit">-</div></div>
+        <div class="p-benefit-sub" id="pSummaryText">導入効果の概要</div>
+      </div>
+      <div class="p-costbox">
+        <div class="p-card"><div class="p-card-label">現在の年間電気代</div><div class="p-card-num" id="pAnnualBill">-</div><div class="p-card-note">現在のご利用状況から推計</div></div>
+        <div class="p-card accent"><div class="p-card-label">導入後の年間買電費</div><div class="p-card-num" id="pAfterBill">-</div><div class="p-card-note">太陽光・蓄電活用後の推計</div></div>
+        <div class="p-card"><div class="p-card-label">年間売電収入</div><div class="p-card-num" id="pSellIncome">-</div><div class="p-card-note">余剰電力の売電見込</div></div>
+        <div class="p-card accent"><div class="p-card-label">投資回収目安</div><div class="p-card-num" id="pPayback">-</div><div class="p-card-note">実質導入費÷年間効果</div></div>
+      </div>
+    </div>
+
+    <div class="p-flow">
+      <div class="p-flow-box"><div class="p-flow-icon">☀</div><div class="p-flow-name">太陽光で発電</div></div><div class="p-arrow">›</div>
+      <div class="p-flow-box"><div class="p-flow-icon">⌂</div><div class="p-flow-name">昼間に自家消費</div></div><div class="p-arrow">›</div>
+      <div class="p-flow-box"><div class="p-flow-icon">▣</div><div class="p-flow-name">余剰を有効活用</div></div><div class="p-arrow">›</div>
+      <div class="p-flow-box"><div class="p-flow-icon">¥</div><div class="p-flow-name">買電負担を削減</div></div>
+    </div>
+    <div class="p-footer"><span>株式会社OMK｜太陽光発電・蓄電池・エコキュート</span><span class="p-page-no">01 / 03</span></div>
+  </section>
+
+  <!-- 2ページ目：電力と長期効果 -->
+  <section class="proposal-page">
+    <div class="p-topbar">
+      <div class="p-brand"><div class="p-logo">OMK</div><div class="p-brand-name">ENERGY SOLUTION</div></div>
+      <div class="p-docmeta">導入効果シミュレーション</div>
+    </div>
+    <div class="p-section-head"><div><h2 class="p-section-title">電力の使い方と長期的な経済効果</h2><div class="p-section-sub">発電した電気を「使う・貯める・売る」に振り分けた場合の概算です。</div></div></div>
+
+    <div class="p-kpi-row">
+      <div class="p-kpi"><small>年間電力使用量</small><strong id="pAnnualUse">-</strong></div>
+      <div class="p-kpi"><small>年間発電量</small><strong id="pGenOut">-</strong></div>
+      <div class="p-kpi"><small>蓄電池経由の利用</small><strong id="pBatteryUse">-</strong></div>
+      <div class="p-kpi"><small>年間売電量</small><strong id="pSellKwh">-</strong></div>
+    </div>
+
+    <div class="p-two-col">
+      <div class="p-panel">
+        <h3>年間エネルギー内訳</h3>
+        <table class="p-table"><tbody>
+          <tr><th>年間電力使用量 推計</th><td id="pAnnualUse2">-</td></tr>
+          <tr><th>太陽光年間発電量</th><td id="pGenOut2">-</td></tr>
+          <tr><th>直接自家消費量</th><td id="pDirectUse">-</td></tr>
+          <tr><th>蓄電池経由の自家消費量</th><td id="pBatteryUse2">-</td></tr>
+          <tr><th>エコキュート昼間活用量</th><td id="pEqUse">-</td></tr>
+          <tr><th>年間売電量</th><td id="pSellKwh2">-</td></tr>
+        </tbody></table>
+      </div>
+      <div class="p-panel">
+        <h3>長期の累積経済効果</h3>
+        <table class="p-table"><thead><tr><th>期間</th><th>累積経済効果</th><th>導入費との差</th></tr></thead><tbody id="pLongRows"></tbody></table>
+        <div class="p-note-box" style="margin-top:5mm">長期試算では、入力された電気料金上昇率・太陽光劣化率の設定を反映します。未設定の場合は現在条件を基本として計算します。</div>
+      </div>
+    </div>
+    <div class="p-footer"><span>OMK ENERGY SOLUTION｜導入効果ご提案書</span><span class="p-page-no">02 / 03</span></div>
+  </section>
+
+  <!-- 3ページ目：条件・注意事項 -->
+  <section class="proposal-page">
+    <div class="p-topbar">
+      <div class="p-brand"><div class="p-logo">OMK</div><div class="p-brand-name">ENERGY SOLUTION</div></div>
+      <div class="p-docmeta">SIMULATION CONDITIONS</div>
+    </div>
+    <div class="p-section-head"><div><h2 class="p-section-title">今回のシミュレーション条件</h2><div class="p-section-sub">お客様から伺った情報と、今回の提案設備をもとに算出しています。</div></div></div>
+    <div class="p-panel" style="padding:7mm">
+      <div class="p-conditions" id="pConditions">条件</div>
+    </div>
+    <div style="margin-top:7mm" class="p-note-box">
+      <strong style="color:#29433f">本シミュレーションについて</strong><br>
+      本資料は、お客様からご提供いただいた情報および標準的な電力使用モデルをもとに算出した概算です。実際の発電量・電気使用量・電気料金・売電収入・削減効果・投資回収期間を保証するものではありません。天候、機器仕様、生活パターン、電気料金プラン、売電条件、設備の運転設定等により実績は変動します。
+    </div>
+    <div style="margin-top:5mm" class="p-note-box">
+      <strong style="color:#29433f">正式なお見積りについて</strong><br>
+      現地調査、設置条件、機器仕様、補助金の適用条件等を確認したうえで、最終的な機器構成・工事内容・お見積りをご案内いたします。
+    </div>
+    <div class="p-footer"><span>株式会社OMK｜本資料は簡易シミュレーションに基づくご提案です</span><span class="p-page-no">03 / 03</span></div>
+  </section>
+</div>
+
+<script>
+const yen=n=>Math.round(n).toLocaleString('ja-JP')+'円';
+const kwh=n=>Math.round(n).toLocaleString('ja-JP')+' kWh';
+const $=id=>document.getElementById(id);
+const get=id=>Number($(id).value)||0;
+const BATTERY_ROUNDTRIP_EFF=0.90; // 蓄電池の充放電総合効率（内部設定）
+const PRODUCT_MASTER={
+ panels:[
+  {maker:'手入力',model:'手入力',w:0,note:'任意のパネル仕様を入力'},
+  {maker:'ハンファジャパン',model:'Re.RISE-NBC 440',w:440,eff:24.2,size:'1,606×1,134×30mm',source:'HWJ_catalog_2605_DL.pdf'},
+  {maker:'ハンファジャパン',model:'Re.RISE-NBC 435',w:435,eff:23.9,size:'1,606×1,134×30mm',source:'HWJ_catalog_2605_DL.pdf'},
+  {maker:'ハンファジャパン',model:'Re.RISE-NBC MS290',w:290,eff:23.5,size:'1,606×767×30mm',source:'HWJ_catalog_2605_DL.pdf'},
+  {maker:'ハンファジャパン',model:'Re.RISE-NBC AG270',w:270,eff:21.9,size:'1,606×767×30mm',source:'HWJ_catalog_2605_DL.pdf'},
+  {maker:'ハンファジャパン',model:'Re.RISE-NBC ML485',w:485,eff:23.7,size:'1,800×1,134×30mm',source:'HWJ_catalog_2605_DL.pdf'},
+  {maker:'ハンファジャパン',model:'Re.RISE S 230',w:230,eff:20.8,size:'1,134×977×30mm',source:'HWJ_catalog_2605_DL.pdf'},
+  {maker:'長州産業',model:'CS-390N11 JAPAN BLACK',w:390,source:'b390w_all.pdf'},
+  {maker:'長州産業',model:'CS-258N11',w:258,source:'b390w_all.pdf'},
+  {maker:'長州産業',model:'CS-126N11S',w:126,source:'b390w_all.pdf'},
+  {maker:'長州産業',model:'CS-126N11L-R',w:126,source:'b390w_all.pdf'},
+  {maker:'長州産業',model:'CS-250N11AG',w:250,source:'b390w_all.pdf'},
+  {maker:'長州産業',model:'CS-123N11SAG',w:123,source:'b390w_all.pdf'},
+  {maker:'長州産業',model:'CS-123N11LAG-RAG',w:123,source:'b390w_all.pdf'}
+ ],
+ pcs:[
+  {maker:'手入力',model:'手入力',kw:0,note:'任意のパワコン仕様を入力'},
+  {maker:'ニチコン',model:'ES-T5 トライブリッドパワコン',kw:5.9,maxPvKw:8.8,mppt:4,eff:96,compat:'nichicon_t5t6',source:'tribrid_t5t6.pdf'},
+  {maker:'ニチコン',model:'ES-T6 トライブリッドパワコン',kw:9.9,maxPvKw:11.0,mppt:5,eff:95,compat:'nichicon_t5t6',source:'tribrid_t5t6.pdf'},
+  {maker:'ハンファジャパン',model:'QREADY-R59-2',kw:5.9,maxPvKw:6.6,mppt:3,eff:96,compat:'qready',source:'HWJ_catalog_2605_DL.pdf'},
+  {maker:'ハンファジャパン',model:'HWJ-BT1-H59 ENERICH',kw:5.9,maxPvKw:12.0,mppt:4,eff:96,compat:'enerich',source:'HWJ_catalog_2605_DL.pdf'},
+  {maker:'HUAWEI',model:'SUN2000-4.95K-LB0-NH',kw:4.95,mppt:3,eff:97.1,compat:'huawei_luna',source:'HWJ_catalog_2605_DL.pdf'},
+  {maker:'長州産業',model:'SSTL30E3CS（屋内）',kw:3.0,eff:96.5,source:'b390w_all.pdf'},
+  {maker:'長州産業',model:'SSTL40E3CS（屋内）',kw:4.0,eff:96.5,source:'b390w_all.pdf'},
+  {maker:'長州産業',model:'SSTL55E3CS（屋内）',kw:5.5,eff:96.5,source:'b390w_all.pdf'},
+  {maker:'長州産業',model:'SSTL44B6CS（屋外）',kw:4.4,eff:96.5,source:'b390w_all.pdf'},
+  {maker:'長州産業',model:'SSTL55B6CS（屋外）',kw:5.5,eff:96.5,source:'b390w_all.pdf'}
+ ],
+ batteries:[
+  {maker:'手入力',model:'手入力',kwh:0,note:'任意の蓄電池仕様を入力'},
+  {maker:'ハンファジャパン',model:'QREADY-B77-1',kwh:7.7,usable:6.8,compat:'qready',source:'HWJ_catalog_2605_DL.pdf'},
+  {maker:'ハンファジャパン',model:'QREADY-B97-1',kwh:9.7,usable:8.6,compat:'qready',source:'HWJ_catalog_2605_DL.pdf'},
+  {maker:'ハンファジャパン',model:'HWJ-BT1-B05',kwh:4.9,usable:4.5,compat:'enerich',source:'HWJ_catalog_2605_DL.pdf'},
+  {maker:'ハンファジャパン',model:'HWJ-BT1-B10',kwh:9.9,usable:9.0,compat:'enerich',source:'HWJ_catalog_2605_DL.pdf'},
+  {maker:'ハンファジャパン',model:'HWJ-BT1-B15',kwh:14.8,usable:13.5,compat:'enerich',source:'HWJ_catalog_2605_DL.pdf'},
+  {maker:'ハンファジャパン',model:'HWJ-BT1-B20',kwh:19.8,usable:17.4,compat:'enerich',source:'HWJ_catalog_2605_DL.pdf'},
+  {maker:'ニチコン',model:'ESS-T5/T6 M1（屋内）',kwh:7.4,usable:6.5,compat:'nichicon_t5t6',source:'tribrid_t5t6.pdf'},
+  {maker:'ニチコン',model:'ESS-T5/T6 MG1（屋外）',kwh:7.4,usable:6.5,compat:'nichicon_t5t6',source:'tribrid_t5t6.pdf'},
+  {maker:'ニチコン',model:'ESS-T5/T6 L1',kwh:9.9,usable:9.1,compat:'nichicon_t5t6',source:'tribrid_t5t6.pdf'},
+  {maker:'ニチコン',model:'ESS-T5/T6 X1',kwh:14.9,usable:12.9,compat:'nichicon_t5t6',source:'tribrid_t5t6.pdf'},
+  {maker:'ニチコン',model:'ESS-T5/T6 Z1',kwh:19.9,usable:18.2,compat:'nichicon_t5t6',source:'tribrid_t5t6.pdf'},
+  {maker:'HUAWEI',model:'LUNA2000-7-NHS1',kwh:7.1,usable:6.7,compat:'huawei_luna',source:'HWJ_catalog_2605_DL.pdf'},
+  {maker:'HUAWEI',model:'LUNA2000-14-NHS1',kwh:14.3,usable:13.4,compat:'huawei_luna',source:'HWJ_catalog_2605_DL.pdf'},
+  {maker:'HUAWEI',model:'LUNA2000-21-NHS1',kwh:21.5,usable:20.1,compat:'huawei_luna',source:'HWJ_catalog_2605_DL.pdf'},
+  {maker:'長州産業',model:'Smart PV Multi 6.5kWh構成',kwh:6.5,source:'spvm2_all.pdf'},
+  {maker:'長州産業',model:'Smart PV Multi 9.7kWh構成',kwh:9.7,source:'spvm2_all.pdf'},
+  {maker:'長州産業',model:'Smart PV Multi 13.0kWh構成',kwh:13.0,source:'spvm2_all.pdf'},
+  {maker:'長州産業',model:'Smart PV Multi 6.3kWh構成',kwh:6.3,source:'spvm2_all.pdf'},
+  {maker:'長州産業',model:'Smart PV Multi 12.7kWh構成',kwh:12.7,source:'spvm2_all.pdf'}
+ ]
+};
+function uniqueMakers(items){return [...new Set(items.map(x=>x.maker))];}
+function fillMakerSelect(id,items){
+ const el=$(id); if(!el)return; el.innerHTML=uniqueMakers(items).map(m=>`<option value="${m}">${m}</option>`).join('');
+}
+function fillModelSelect(makerId,modelId,items){
+ const maker=$(makerId)?.value||'手入力'; const el=$(modelId); if(!el)return;
+ const list=items.filter(x=>x.maker===maker); el.innerHTML=list.map(x=>`<option value="${x.model}">${x.model}</option>`).join('');
+}
+function selectedProduct(makerId,modelId,items){return items.find(x=>x.maker===$(makerId)?.value&&x.model===$(modelId)?.value);}
+function updatePanelProduct(recalc=true){
+ const x=selectedProduct('panelMaker','panelModel',PRODUCT_MASTER.panels); if(!x)return;
+ if(x.w>0){$('panelW').value=x.w; $('panelW').classList.add('catalog-filled');} else $('panelW').classList.remove('catalog-filled');
+ const spec=$('panelSpec'); if(spec) spec.textContent=x.maker==='手入力'?'手入力モードです。任意の1枚出力・枚数・容量を入力できます。':`${x.model}｜${x.w}W${x.eff?'｜変換効率 '+x.eff+'%':''}${x.size?'｜'+x.size:''}｜出典：${x.source}`;
+ updateSolarCapacity(false); if(recalc)calculate();
+}
+function updateSolarCapacity(recalc=true){
+ const w=get('panelW'), n=Math.max(0,get('panelCount')); if(w>0&&n>0)$('solarKw').value=(w*n/1000).toFixed(3).replace(/0+$/,'').replace(/\.$/,'');
+ updatePcsDesign(recalc); renderPcsCandidates();
+}
+function updatePcsProduct(recalc=true){
+ const x=selectedProduct('pcsMaker','pcsModel',PRODUCT_MASTER.pcs); if(!x)return;
+ if(x.kw>0){$('pcsUnitKw').value=x.kw; $('pcsUnitKw').classList.add('catalog-filled');} else $('pcsUnitKw').classList.remove('catalog-filled');
+ updatePcsDesign(recalc); filterCompatibleBatteries(false);
+}
+function updatePcsDesign(recalc=true){
+ const unit=get('pcsUnitKw'), count=Math.max(1,get('pcsCount')||1), total=unit*count, solar=[4,5].includes(currentPattern())?get('existKw'):get('solarKw');
+ $('pcsTotalKw').value=total?total.toFixed(2):'0'; updateCombinedPcs();
+ const ratio=total>0?solar/total:0; $('dcAcRatio').value=ratio?`${ratio.toFixed(2)}（${(ratio*100).toFixed(0)}%）`:'-';
+ const x=selectedProduct('pcsMaker','pcsModel',PRODUCT_MASTER.pcs); const spec=$('pcsSpec');
+ if(spec){
+   let txt=x&&x.maker!=='手入力'?`${x.model}｜定格出力 ${x.kw}kW/台${x.mppt?'｜MPPT '+x.mppt+'回路':''}${x.eff?'｜変換効率 '+x.eff+'%':''}${x.maxPvKw?'｜カタログ記載PV入力/最大発電電力 '+x.maxPvKw+'kW/台':''}｜出典：${x.source}`:'手入力モードです。任意のパワコン定格出力と台数を入力できます。';
+   let warn=false;
+   if(x?.maxPvKw&&solar>x.maxPvKw*count){txt+=`　⚠ パネル容量 ${solar.toFixed(2)}kW がカタログ記載の入力目安 ${ (x.maxPvKw*count).toFixed(2)}kW を超えています。`; warn=true;}
+   spec.textContent=txt; spec.classList.toggle('warn',warn);
+ }
+ if(recalc)calculate();
+}
+function updateBatteryProduct(recalc=true){
+ const x=selectedCompatibleBattery(); if(!x)return;
+ if(x.kwh>0){$('batteryKwh').value=x.kwh; $('batteryKwh').classList.add('catalog-filled');} else $('batteryKwh').classList.remove('catalog-filled');
+ const spec=$('batterySpec'); if(spec) spec.textContent=x.maker==='手入力'?'手入力モードです。任意の蓄電容量を入力できます。':`${x.model}｜容量 ${x.kwh}kWh${x.usable?'｜初期実効容量 '+x.usable+'kWh':''}｜出典：${x.source}`;
+ if(recalc)calculate();
+}
+
+function setSelectValue(id,value){
+ const el=$(id); if(!el)return false;
+ const ok=[...el.options].some(o=>o.value===value); if(ok){el.value=value;return true;} return false;
+}
+function getDesignSolarKw(){const p=currentPattern(); return [4,5].includes(p)?get('existKw'):get('solarKw');}
+function buildPcsCandidates(){
+ const solar=getDesignSolarKw();
+ if(!(solar>0)) return [];
+ const candidates=[];
+ PRODUCT_MASTER.pcs.filter(x=>x.maker!=='手入力'&&x.kw>0).forEach(x=>{
+   let count=1, known=!!x.maxPvKw;
+   if(known) count=Math.max(1,Math.ceil(solar/x.maxPvKw));
+   else count=Math.max(1,Math.ceil(solar/x.kw)); // 最大PV入力未登録機種は保守的に定格出力以上を確保
+   if(count>12) return;
+   const total=x.kw*count;
+   const ratio=total>0?solar/total:0;
+   const pvLimit=known?x.maxPvKw*count:null;
+   const fits=known?solar<=pvLimit+1e-9:true;
+   const batCount=x.compat?PRODUCT_MASTER.batteries.filter(b=>b.compat===x.compat).length:0;
+   candidates.push({x,count,total,ratio,pvLimit,known,fits,batCount});
+ });
+ candidates.sort((a,b)=>{
+   if(a.known!==b.known) return a.known?-1:1;
+   if(a.count!==b.count) return a.count-b.count;
+   return Math.abs(a.ratio-1)-Math.abs(b.ratio-1);
+ });
+ return candidates;
+}
+function renderPcsCandidates(){
+ const grid=$('pcsCandidateGrid'), status=$('designCandidateStatus'); if(!grid||!status)return;
+ const solar=getDesignSolarKw();
+ if(!(solar>0)){grid.innerHTML='';status.textContent='パネル型式と枚数を入力すると候補を表示します。';return;}
+ const list=buildPcsCandidates().slice(0,6);
+ status.textContent=`太陽光容量 ${solar.toFixed(3).replace(/0+$/,'').replace(/\.$/,'')}kW に対する候補です。カタログ上限値が登録済みの機種を優先しています。`;
+ if(!list.length){grid.innerHTML='<div class="compat-status warn">自動候補がありません。パワコンを手入力してください。</div>';return;}
+ grid.innerHTML=list.map((c,i)=>{
+   const badge=c.known?(i===0?'適合候補・優先':'適合候補'):'参考候補';
+   const cls=c.known?'candidate-badge':'candidate-badge ref';
+   const limit=c.known?`PV入力上限：${c.pvLimit.toFixed(2)}kW`:'最大PV入力：マスタ未登録';
+   const bats=c.batCount?`｜対応蓄電池候補 ${c.batCount}種`:'｜蓄電池自動連動なし';
+   return `<div class="candidate-card ${i===0&&c.known?'best':''}">
+     <span class="${cls}">${badge}</span>
+     <h4>${c.x.maker}<br>${c.x.model}</h4>
+     <div class="candidate-kpi">${c.x.kw}kW × ${c.count}台</div>
+     <div class="candidate-meta">合計出力 ${c.total.toFixed(2)}kW｜DC/AC比 ${(c.ratio*100).toFixed(0)}%<br>${limit}${bats}</div>
+     <button type="button" class="btn ${i===0&&c.known?'primary':'outline'} applyPcsCandidate" data-maker="${c.x.maker}" data-model="${c.x.model}" data-count="${c.count}">この構成を採用</button>
+   </div>`;
+ }).join('');
+ grid.querySelectorAll('.applyPcsCandidate').forEach(btn=>btn.addEventListener('click',()=>{
+   applyPcsCandidate(btn.dataset.maker,btn.dataset.model,Number(btn.dataset.count)||1);
+ }));
+}
+function applyPcsCandidate(maker,model,count){
+ if(!setSelectValue('pcsMaker',maker))return;
+ fillModelSelect('pcsMaker','pcsModel',PRODUCT_MASTER.pcs);
+ setSelectValue('pcsModel',model);
+ $('pcsCount').value=count;
+ updatePcsProduct(false);
+ filterCompatibleBatteries(true);
+ updatePcsDesign(true);
+ $('pcsBox')?.classList.add('auto-selected');setTimeout(()=>$('pcsBox')?.classList.remove('auto-selected'),700);
+}
+function compatibleBatteryList(){
+ const pcs=selectedProduct('pcsMaker','pcsModel',PRODUCT_MASTER.pcs);
+ const manual=PRODUCT_MASTER.batteries.find(b=>b.maker==='手入力');
+ if(!pcs||pcs.maker==='手入力'||!pcs.compat) return manual?[manual]:[];
+ return [manual,...PRODUCT_MASTER.batteries.filter(b=>b.compat===pcs.compat)].filter(Boolean);
+}
+function fillBatterySelectFromItems(items,preserve=true){
+ const oldMaker=$('batteryMaker')?.value, oldModel=$('batteryModel')?.value;
+ const makers=uniqueMakers(items);
+ $('batteryMaker').innerHTML=makers.map(m=>`<option value="${m}">${m}</option>`).join('');
+ if(preserve&&makers.includes(oldMaker)) $('batteryMaker').value=oldMaker;
+ fillModelSelectFromItems(items,preserve?oldModel:null);
+}
+function fillModelSelectFromItems(items,preserveModel=null){
+ const maker=$('batteryMaker')?.value||'手入力';
+ const list=items.filter(x=>x.maker===maker);
+ $('batteryModel').innerHTML=list.map(x=>`<option value="${x.model}">${x.model}</option>`).join('');
+ if(preserveModel&&list.some(x=>x.model===preserveModel)) $('batteryModel').value=preserveModel;
+}
+function selectedCompatibleBattery(){
+ return PRODUCT_MASTER.batteries.find(x=>x.maker===$('batteryMaker')?.value&&x.model===$('batteryModel')?.value);
+}
+function filterCompatibleBatteries(selectFirst=false){
+ const status=$('batteryCompatStatus'); if(!$('batteryMaker')||!$('batteryModel'))return;
+ const pcs=selectedProduct('pcsMaker','pcsModel',PRODUCT_MASTER.pcs);
+ const items=compatibleBatteryList();
+ fillBatterySelectFromItems(items,!selectFirst);
+ if(selectFirst&&items.length>1){
+   $('batteryMaker').value=items[1].maker; fillModelSelectFromItems(items,items[1].model); $('batteryModel').value=items[1].model;
+ }
+ const b=selectedCompatibleBattery();
+ if(b&&b.kwh>0){$('batteryKwh').value=b.kwh;}
+ if(!status)return;
+ if(!pcs||pcs.maker==='手入力'){
+   status.textContent='パワコンが手入力のため、蓄電池の自動適合判定は行いません。蓄電池も手入力してください。';status.classList.add('warn');
+ }else if(!pcs.compat){
+   status.textContent=`${pcs.model} は、今回の登録カタログから蓄電池との組合せを特定できないため、自動候補を表示していません。`;status.classList.add('warn');
+ }else{
+   const matched=PRODUCT_MASTER.batteries.filter(b=>b.compat===pcs.compat);
+   status.textContent=`${pcs.model} とカタログ上のシステム系列が一致する蓄電池を ${matched.length} 構成に絞り込みました。`;status.classList.remove('warn');
+ }
+ updateBatteryProduct(false);
+}
+
+function initProductMaster(){
+ fillMakerSelect('panelMaker',PRODUCT_MASTER.panels); fillModelSelect('panelMaker','panelModel',PRODUCT_MASTER.panels);
+ fillMakerSelect('pcsMaker',PRODUCT_MASTER.pcs); fillModelSelect('pcsMaker','pcsModel',PRODUCT_MASTER.pcs);
+ fillMakerSelect('batteryMaker',PRODUCT_MASTER.batteries); fillModelSelect('batteryMaker','batteryModel',PRODUCT_MASTER.batteries);
+ updatePanelProduct(false); updatePcsProduct(false); filterCompatibleBatteries(false); updateBatteryProduct(false); renderPcsCandidates();
+}
+function currentPattern(){return Number(document.querySelector('input[name=pattern]:checked').value)}
+function updateBoxes(){
+ const p=currentPattern();
+ document.getElementById('newSolarBox').classList.toggle('hidden',![1,2,3,6,7].includes(p));
+ document.getElementById('existingSolarBox').classList.toggle('hidden',![4,5,6].includes(p));
+ document.getElementById('batteryBox').classList.toggle('hidden',![2,3,4,5,6].includes(p));
+ document.getElementById('eqBox').classList.toggle('hidden',![3,5].includes(p));
+ document.getElementById('industrialBox').classList.toggle('hidden',p!==7);
+ const nsh=document.getElementById('newSolarHeading'); if(nsh) nsh.textContent=p===6?'追加する太陽光':'新規太陽光';
+ const eh=document.getElementById('existingSolarHint'); if(eh) eh.textContent=p===6?'既設太陽光の発電に、下の「追加する太陽光」の年間予測発電量を加えて試算します。':'④・⑤では既設太陽光の条件だけを使用し、新規太陽光の発電量は加算しません。';
+}
+
+function estimateAnnualBill(){
+ if(currentPattern()===7){
+   const entered=get('industrialAnnualBill');
+   if(entered>0) return entered;
+   return get('industrialAnnualUse')*get('buyUnit');
+ }
+ const s=get('summerBill'), w=get('winterBill');
+ // 春秋は夏冬の中間よりやや低めとして推計：夏3か月、冬4か月、中間5か月
+ const mid=((s+w)/2)*0.82;
+ return s*3+w*4+mid*5;
+}
+function estimateAnnualUse(annualBill,buyUnit){
+ if(currentPattern()===7) return get('industrialAnnualUse');
+ // 基本料金等を考慮し、電力量料金相当を年間請求の85%と仮定
+ return buyUnit>0 ? annualBill*0.85/buyUnit : 0;
+}
+function dayShare(){
+ if(currentPattern()===7) return Math.min(1,Math.max(0,get('industrialDayShare')/100));
+ const family=Math.max(1,get('family')), day=get('dayPeople');
+ let share=0.23 + Math.min(day/family,1)*0.20;
+ if(document.getElementById('energy').value==='all') share+=0.02;
+ return Math.min(0.48,share);
+}
+function eqAnnualUse(){
+ const family=Math.max(1,get('family'));
+ // 簡易標準値。世帯人数に応じて年間の給湯電力量を推計
+ return 520 + family*180;
+}
+function calcYear(year, base){
+ const rise=Math.pow(1+base.rise,year-1);
+ const degrade=base.useDegrade?Math.pow(1-base.degrade,year-1):1;
+ let gen=base.gen*degrade;
+ let direct=Math.min(gen,base.annualUse*base.dayShare*(base.p===7?0.95:0.85));
+ let surplus=Math.max(0,gen-direct);
+ let eq=0,battDelivered=0;
+ if([3,5].includes(base.p)){
+   const eqNeed=eqAnnualUse()*(get('eqShift')/100);
+   eq=Math.min(surplus,eqNeed);
+   surplus-=eq;
+ }
+ if([2,3,4,5,6].includes(base.p)){
+   const cap=get('batteryKwh')*0.90;
+   const annualChargeCap=cap*330;
+   const nightNeed=Math.max(0,base.annualUse-direct-eq);
+   const charge=Math.min(surplus,annualChargeCap, nightNeed/BATTERY_ROUNDTRIP_EFF);
+   battDelivered=charge*BATTERY_ROUNDTRIP_EFF;
+   surplus-=charge;
+ }
+ const sell= Math.max(0,surplus);
+ const bought=Math.max(0,base.annualUse-direct-eq-battDelivered);
+ const afterBuy=bought*base.buyUnit*rise;
+ const sellIncome=sell*base.sellUnit;
+ const currentSellIncome=base.currentSellIncome;
+ const currentCost=base.annualBill*rise - currentSellIncome;
+ const afterNet=afterBuy-sellIncome;
+ const benefit=currentCost-afterNet;
+ return {gen,direct,eq,battDelivered,sell,bought,afterBuy,sellIncome,benefit};
+}
+function calculate(){
+ const p=currentPattern();
+ const annualBill=estimateAnnualBill();
+ const buyUnit=get('buyUnit');
+ const annualUse=estimateAnnualUse(annualBill,buyUnit);
+ let gen=0,sellUnit=0,currentSellIncome=0;
+ if([1,2,3,7].includes(p)){
+   // 新設太陽光／産業用：入力した新規太陽光の年間発電量のみを使用
+   gen=get('annualGen');
+   sellUnit=get('sellUnitNew');
+ } else if([4,5].includes(p)){
+   // 既設太陽光＋蓄電池（＋EQ）：新しい太陽光は一切加算しない
+   currentSellIncome=get('annualSellYen');
+   sellUnit=get('sellUnitExisting');
+   const currentSellKwh=sellUnit>0?currentSellIncome/sellUnit:0;
+   const estimatedExistingDirect=annualUse*dayShare()*0.85;
+   gen=currentSellKwh + estimatedExistingDirect;
+ } else if(p===6){
+   // 既設太陽光＋太陽光増設＋蓄電池：既設分と増設分を明確に合算
+   currentSellIncome=get('annualSellYen');
+   sellUnit=get('sellUnitExisting');
+   const currentSellKwh=sellUnit>0?currentSellIncome/sellUnit:0;
+   const estimatedExistingDirect=annualUse*dayShare()*0.85;
+   const existingGen=currentSellKwh + estimatedExistingDirect;
+   const addedGen=get('annualGen');
+   gen=existingGen + addedGen;
+ }
+ const base={p,annualBill,annualUse,gen,sellUnit,currentSellIncome,buyUnit,dayShare:dayShare(),rise:get('priceRise')/100,useDegrade:document.getElementById('useDegrade').checked,degrade:get('degrade')/100};
+ const y1=calcYear(1,base);
+ const selfConsumptionRate=y1.gen>0?Math.min(100,Math.max(0,(y1.direct+y1.battDelivered+y1.eq)/y1.gen*100)):0;
+ const price=Math.max(0,get('price')-get('subsidy'));
+ const pay=y1.benefit>0?price/y1.benefit:0;
+ document.getElementById('annualBenefit').textContent=yen(y1.benefit)+'/年';
+ document.getElementById('annualBill').textContent=yen(annualBill);
+ document.getElementById('afterBill').textContent=yen(y1.afterBuy);
+ document.getElementById('sellIncome').textContent=yen(y1.sellIncome);
+ document.getElementById('payback').textContent=pay>0?pay.toFixed(1)+'年':'算出不可';
+ document.getElementById('annualUse').textContent=kwh(annualUse);
+ document.getElementById('genOut').textContent=kwh(y1.gen);
+ document.getElementById('directUse').textContent=kwh(y1.direct);
+ document.getElementById('batteryUse').textContent=kwh(y1.battDelivered);
+ document.getElementById('eqUse').textContent=kwh(y1.eq);
+ document.getElementById('sellKwh').textContent=kwh(y1.sell);
+ document.getElementById('selfConsumptionRate').textContent=selfConsumptionRate.toFixed(1)+'%';
+ let cum=0,rows='';
+ for(let y=1;y<=20;y++){
+   const r=calcYear(y,base); cum+=r.benefit;
+   if([5,10,15,20].includes(y)) rows+=`<tr><td>${y}年</td><td>${yen(cum)}</td><td>${yen(cum-price)}</td></tr>`;
+ }
+ document.getElementById('longRows').innerHTML=rows;
+ const patNames={1:'太陽光のみ',2:'太陽光＋蓄電池',3:'太陽光＋蓄電池＋エコキュート昼間沸き上げ',4:'既設太陽光＋蓄電池',5:'既設太陽光＋蓄電池＋エコキュート交換',6:'既設太陽光＋太陽光増設＋蓄電池',7:'産業用・自家消費型太陽光'};
+ let cond=[`導入パターン：${patNames[p]}`];
+ if(p===7){
+   cond.push(`年間使用電力量：${kwh(get('industrialAnnualUse'))}`,
+             `昼間使用率：${get('industrialDayShare')}%`,
+             `年間稼働日数：${get('industrialDays')}日`,
+             `年間電気料金：${yen(annualBill)}`);
+   const useType=$('industrialUseType').value.trim();
+   if(useType) cond.push(`施設用途：${useType}`);
+ } else {
+   cond.push(`世帯人数：${get('family')}人`,
+             `昼間在宅人数：${get('dayPeople')}人`,
+             `夏場電気代：${yen(get('summerBill'))}/月`,
+             `冬場電気代：${yen(get('winterBill'))}/月`);
+ }
+ cond.push(`買電単価：${get('buyUnit')}円/kWh`,`実質導入費：${yen(price)}`);
+ if([4,5].includes(p)) cond.push('太陽光増設：なし（既設太陽光のみで試算）');
+ if([4,5,6].includes(p)&&get('externalPcsKw')>0) cond.push(`太陽光外部発電用パワコン：${get('externalPcsKw')}kW`,`PCS合計出力（参考）：${(get('pcsTotalKw')+get('externalPcsKw')).toFixed(2)}kW`);
+ if(p===6) cond.push(`太陽光増設：あり（追加容量 ${get('solarKw')}kW）`);
+ if(CURRENT_LAYOUT&&[1,2,3,6,7].includes(p)) cond.push(`太陽光レイアウト：${CURRENT_LAYOUT.count}枚・外周離隔${CURRENT_LAYOUT.setback}mm・${CURRENT_LAYOUT.orientation}`);
+ if([1,2,3,6,7].includes(p)){
+   const pm=$('panelMaker')?.value, pmo=$('panelModel')?.value; if(pm&&pm!=='手入力') cond.push(`太陽光パネル：${pm} ${pmo} / ${get('panelW')}W×${get('panelCount')}枚 = ${get('solarKw')}kW`);
+ }
+ const pcm=$('pcsMaker')?.value, pcmo=$('pcsModel')?.value; if(get('pcsTotalKw')>0) cond.push(`パワコン：${pcm||'手入力'} ${pcmo||''} / ${get('pcsUnitKw')}kW×${get('pcsCount')}台 = ${get('pcsTotalKw')}kW`,`DC/AC比：${$('dcAcRatio')?.value||'-'}`);
+ if([1,2,3,7].includes(p)) cond.push(`年間予測発電量：${kwh(get('annualGen'))}`); else if(p===6) cond.push(`追加太陽光 年間予測発電量：${kwh(get('annualGen'))}`,`既設太陽光 年間売電金額：${yen(get('annualSellYen'))}`,`既設売電単価：約${get('sellUnitExisting')}円/kWh`); else cond.push(`年間売電金額：${yen(get('annualSellYen'))}`,`売電単価：約${get('sellUnitExisting')}円/kWh`);
+ if([2,3,4,5,6].includes(p)){ const bm=$('batteryMaker')?.value, bmo=$('batteryModel')?.value; cond.push(`蓄電池：${bm&&bm!=='手入力'?bm+' '+bmo+' / ':''}${get('batteryKwh')}kWh`); }
+ if([3,5].includes(p)) cond.push(`エコキュート昼間移行率：${get('eqShift')}%`);
+ cond.push(`太陽光経年劣化：${base.useDegrade?get('degrade')+'%/年':'考慮しない'}`,`電気料金上昇率：${get('priceRise')}%/年`);
+ document.getElementById('conditions').innerHTML=cond.join('<br>');
+ const nm=document.getElementById('name').value||'お客様'; const st=document.getElementById('staff').value||'-';
+ document.getElementById('printMeta').textContent=`${nm}　｜　担当：${st}　｜　${new Date().toLocaleDateString('ja-JP')}`;
+ const status=$('actionStatus'); if(status){
+   const t=new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+   if([4,5].includes(p)) status.textContent='再計算しました：既設太陽光のみ＋新設蓄電池で試算（太陽光増設なし）｜'+t;
+   else if(p===6) status.textContent='再計算しました：既設太陽光＋追加太陽光＋蓄電池で試算｜'+t;
+   else status.textContent='再計算しました：'+t;
+ }
+}
+function resetForm(){ location.reload(); }
+function populateProposal(){
+  const p=currentPattern();
+  const patNames={1:'太陽光のみ',2:'太陽光＋蓄電池',3:'太陽光＋蓄電池＋エコキュート昼間沸き上げ',4:'既設太陽光＋蓄電池',5:'既設太陽光＋蓄電池＋エコキュート交換',6:'既設太陽光＋太陽光増設＋蓄電池',7:'産業用・自家消費型太陽光'};
+  const copy=(from,to)=>{ const a=$(from),b=$(to); if(a&&b)b.innerHTML=a.innerHTML; };
+  $('pPatternBadge').textContent=patNames[p];
+  $('pCustomer').textContent=($('name').value||'お客様')+'　御中';
+  $('pMeta').textContent='作成日：'+new Date().toLocaleDateString('ja-JP')+'　担当：'+($('staff').value||'-');
+  copy('annualBill','pAnnualBill'); copy('afterBill','pAfterBill'); copy('sellIncome','pSellIncome'); copy('payback','pPayback');
+  copy('annualBenefit','pAnnualBenefit'); copy('annualUse','pAnnualUse'); copy('annualUse','pAnnualUse2'); copy('genOut','pGenOut'); copy('genOut','pGenOut2'); copy('directUse','pDirectUse'); copy('batteryUse','pBatteryUse'); copy('batteryUse','pBatteryUse2'); copy('eqUse','pEqUse'); copy('sellKwh','pSellKwh'); copy('sellKwh','pSellKwh2');
+  $('pLongRows').innerHTML=$('longRows').innerHTML;
+  $('pConditions').innerHTML=$('conditions').innerHTML.split('<br>').map(x=>`<div>${x}</div>`).join('');
+  $('pSummaryText').innerHTML=p===7
+    ? `今回の「${patNames[p]}」では、年間で <strong>${$('annualBenefit').textContent}</strong> の経済効果を見込みます。投資回収の目安は <strong>${$('payback').textContent}</strong>。発電した電気を事業所内で優先的に自家消費し、昼間の買電負担を抑えるプランです。`
+    : p===6
+    ? `今回の「${patNames[p]}」では、既設太陽光に追加太陽光の発電量を加え、蓄電池で自家消費を高めた場合を試算しています。年間経済効果は <strong>${$('annualBenefit').textContent}</strong>、投資回収の目安は <strong>${$('payback').textContent}</strong> です。`
+    : `今回の「${patNames[p]}」では、年間で <strong>${$('annualBenefit').textContent}</strong> の経済効果を見込みます。投資回収の目安は <strong>${$('payback').textContent}</strong>。発電した電気をできるだけご家庭で活用し、将来の買電負担を抑えるプランです。`;
+}
+
+function roundedRect(ctx,x,y,w,h,r,fill,stroke){
+  ctx.beginPath();
+  ctx.roundRect(x,y,w,h,r);
+  if(fill){ctx.fillStyle=fill;ctx.fill();}
+  if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=1.5;ctx.stroke();}
+}
+function drawText(ctx,text,x,y,size=24,weight='400',color='#17252b',align='left'){
+  ctx.font=`${weight} ${size}px -apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",Meiryo,sans-serif`;
+  ctx.fillStyle=color; ctx.textAlign=align; ctx.textBaseline='alphabetic';
+  ctx.fillText(String(text),x,y);
+}
+function wrapText(ctx,text,x,y,maxWidth,lineHeight,size=22,weight='400',color='#53666b'){
+  ctx.font=`${weight} ${size}px -apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",Meiryo,sans-serif`;
+  ctx.fillStyle=color;ctx.textAlign='left';ctx.textBaseline='top';
+  const chars=[...String(text)]; let line='', yy=y;
+  for(const ch of chars){
+    const test=line+ch;
+    if(ctx.measureText(test).width>maxWidth && line){
+      ctx.fillText(line,x,yy); yy+=lineHeight; line=ch;
+    } else line=test;
+  }
+  if(line) ctx.fillText(line,x,yy);
+  return yy+lineHeight;
+}
+function pdfHeader(ctx,pageNo,title){
+  ctx.fillStyle='#0b2545';ctx.fillRect(0,0,1600,18);
+  ctx.fillStyle='#0f6cbd';ctx.fillRect(0,18,1600,5);
+  drawText(ctx,'OMK',90,76,38,'900','#0b2545');
+  drawText(ctx,'ENERGY SOLUTION',235,74,16,'700','#0f6cbd');
+  drawText(ctx,title,1510,74,18,'700','#607579','right');
+  ctx.strokeStyle='#d7e0ea';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(85,100);ctx.lineTo(1515,100);ctx.stroke();
+  drawText(ctx,'株式会社OMK',90,1085,16,'600','#6d7d91');
+  drawText(ctx,`${pageNo} / 3`,1510,1085,16,'800','#0f6cbd','right');
+}
+function metricCard(ctx,x,y,w,h,label,value,accent=false){
+  roundedRect(ctx,x,y,w,h,10,accent?'#edf5fc':'#f7f9fc',accent?'#9fc8e8':'#d7e0ea');
+  drawText(ctx,label,x+28,y+42,17,'600','#738388');
+  drawText(ctx,value,x+28,y+94,34,'900',accent?'#0f6cbd':'#172536');
+}
+function tableRow(ctx,x,y,w,label,value,alt=false){
+  if(alt){ctx.fillStyle='#f8fbfa';ctx.fillRect(x,y,w,48);}
+  drawText(ctx,label,x+18,y+31,17,'500','#5e6d80');
+  drawText(ctx,value,x+w-18,y+31,18,'800','#172536','right');
+  ctx.strokeStyle='#e1e7ee';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x,y+48);ctx.lineTo(x+w,y+48);ctx.stroke();
+}
+function makeProposalCanvases(){
+  calculate(); populateProposal();
+  const W=1600,H=1131;
+  const canvases=[];
+  const mk=()=>{const c=document.createElement('canvas');c.width=W;c.height=H;const ctx=c.getContext('2d');ctx.fillStyle='#ffffff';ctx.fillRect(0,0,W,H);return [c,ctx];};
+  const patNames={1:'太陽光のみ',2:'太陽光＋蓄電池',3:'太陽光＋蓄電池＋エコキュート昼間沸き上げ',4:'既設太陽光＋蓄電池',5:'既設太陽光＋蓄電池＋エコキュート交換',6:'既設太陽光＋太陽光増設＋蓄電池',7:'産業用・自家消費型太陽光'};
+  const p=currentPattern();
+  const name=(document.getElementById('name').value||'お客様')+' 様';
+  const staff=document.getElementById('staff').value||'-';
+  const date=new Date().toLocaleDateString('ja-JP');
+  const annualBenefit=document.getElementById('annualBenefit').textContent;
+  const annualBill=document.getElementById('annualBill').textContent;
+  const afterBill=document.getElementById('afterBill').textContent;
+  const sellIncome=document.getElementById('sellIncome').textContent;
+  const payback=document.getElementById('payback').textContent;
+  const selfRate=document.getElementById('selfConsumptionRate').textContent;
+
+  // Page 1
+  {
+    const [c,ctx]=mk(); pdfHeader(ctx,1,'導入効果ご提案書');
+    drawText(ctx,'導入効果シミュレーション',90,175,20,'800','#0f6cbd');
+    drawText(ctx,`${name}  ご提案書`,90,235,48,'900','#0b2545');
+    drawText(ctx,patNames[p],90,282,24,'800','#0f6cbd');
+    drawText(ctx,`作成日：${date}　担当：${staff}`,1510,230,18,'500','#6b7b80','right');
+
+    roundedRect(ctx,90,330,900,300,14,'#0b2545');
+    drawText(ctx,'年間経済効果（概算）',135,395,24,'700','#bfd6ea');
+    drawText(ctx,annualBenefit,135,505,70,'900','#ffffff');
+    wrapText(ctx,p===7?'現在の電力使用量・発電量・昼間使用率をもとに、設備導入後の電力コスト削減効果を概算しています。':p===6?'既設太陽光の発電に追加太陽光の発電量を加え、蓄電池で自家消費を高めた場合を概算しています。':'現在の電気料金・発電量・生活パターンをもとに、設備導入後の家計メリットを概算しています。',135,545,780,34,20,'500','#dce9f4');
+
+    metricCard(ctx,1030,330,480,135,'現在の年間電気代',annualBill,false);
+    metricCard(ctx,1030,485,480,135,'導入後の年間買電費',afterBill,true);
+    metricCard(ctx,90,680,340,150,'年間売電収入',sellIncome,false);
+    metricCard(ctx,455,680,340,150,'投資回収目安',payback,true);
+    metricCard(ctx,820,680,340,150,'実質導入費',yen(Math.max(0,get('price')-get('subsidy'))),false);
+    metricCard(ctx,1185,680,325,150,'補助金',yen(get('subsidy')),false);
+
+    roundedRect(ctx,90,875,1420,120,10,'#f4f7fb','#d7e0ea');
+    drawText(ctx,'ご提案のポイント',120,918,20,'800','#314156');
+    wrapText(ctx,`「${patNames[p]}」により、発電した電気をできるだけ家庭内で有効活用し、買電量の削減を目指すプランです。`,120,942,1340,30,18,'500','#5e6d80');
+    canvases.push(c);
+  }
+
+  // Page 2
+  {
+    const [c,ctx]=mk(); pdfHeader(ctx,2,'電力の使い方・長期効果');
+    drawText(ctx,'電力の使い方と長期効果',90,165,38,'900','#0b2545'); ctx.fillStyle='#0f6cbd';ctx.fillRect(90,185,210,5);
+    drawText(ctx,'年間エネルギー内訳と、5〜20年間の累積経済効果を確認します。',90,205,19,'500','#657386');
+
+    roundedRect(ctx,90,250,680,610,10,'#ffffff','#d7e0ea');
+    drawText(ctx,'年間エネルギー内訳',120,300,23,'800','#314156');
+    const rows=[
+      ['年間電力使用量 推計',document.getElementById('annualUse').textContent],
+      ['太陽光年間発電量',document.getElementById('genOut').textContent],
+      ['直接自家消費量',document.getElementById('directUse').textContent],
+      ['蓄電池経由の自家消費量',document.getElementById('batteryUse').textContent],
+      ['エコキュート昼間活用量',document.getElementById('eqUse').textContent],
+      ['年間売電量',document.getElementById('sellKwh').textContent],
+      ['推定自家消費率',selfRate],
+    ];
+    rows.forEach((r,i)=>tableRow(ctx,120,330+i*61,620,r[0],r[1],i%2===0));
+
+    roundedRect(ctx,810,250,700,610,10,'#ffffff','#d7e0ea');
+    drawText(ctx,'長期の累積経済効果',840,300,23,'800','#314156');
+    const trs=[...document.querySelectorAll('#longRows tr')].map(tr=>[...tr.children].map(td=>td.textContent));
+    const xs=[840,1005,1170,1335];
+    trs.forEach((r,i)=>{
+      roundedRect(ctx,xs[i],350,145,175,8,'#eef4fa','#d7e0ea');
+      drawText(ctx,r[0],xs[i]+72,390,19,'700','#68797d','center');
+      drawText(ctx,r[1],xs[i]+72,445,24,'900','#0f6cbd','center');
+      drawText(ctx,'累積効果',xs[i]+72,480,15,'500','#7b8b8f','center');
+    });
+    drawText(ctx,'実質導入費との差',840,595,19,'800','#314156');
+    trs.forEach((r,i)=>{
+      drawText(ctx,r[0],840,645+i*52,17,'700','#66797d');
+      drawText(ctx,r[2],1470,645+i*52,20,'900',r[2].includes('-')?'#a95c00':'#0f6cbd','right');
+      ctx.strokeStyle='#e1e7ee';ctx.beginPath();ctx.moveTo(840,660+i*52);ctx.lineTo(1470,660+i*52);ctx.stroke();
+    });
+
+    roundedRect(ctx,90,900,1420,105,10,'#edf5fc','#c5daeb');
+    drawText(ctx,'長期試算について',120,940,19,'800','#0f6cbd');
+    wrapText(ctx,'電気料金上昇率や太陽光パネルの経年劣化率を設定した場合は、その条件を各年の試算に反映します。',120,960,1340,29,17,'500','#5e6d80');
+    canvases.push(c);
+  }
+
+  // Page 3
+  {
+    const [c,ctx]=mk(); pdfHeader(ctx,3,'シミュレーション条件');
+    drawText(ctx,'シミュレーション条件',90,165,38,'900','#0b2545'); ctx.fillStyle='#0f6cbd';ctx.fillRect(90,185,180,5);
+    drawText(ctx,'今回の試算に使用した主な前提条件です。',90,205,19,'500','#657386');
+
+    const condText=document.getElementById('conditions').innerText.split('\n').filter(Boolean);
+    roundedRect(ctx,90,250,900,650,10,'#ffffff','#d7e0ea');
+    drawText(ctx,'試算条件',120,300,23,'800','#314156');
+    condText.forEach((t,i)=>{
+      const yy=345+i*50;
+      drawText(ctx,t,125,yy,18,'600','#43565b');
+      ctx.strokeStyle='#e5eaf0';ctx.beginPath();ctx.moveTo(120,yy+16);ctx.lineTo(955,yy+16);ctx.stroke();
+    });
+
+    roundedRect(ctx,1030,250,480,650,10,'#f4f7fb','#d7e0ea');
+    drawText(ctx,'ご確認事項',1060,300,23,'800','#314156');
+    let yy=350;
+    yy=wrapText(ctx,'本シミュレーションは、お客様からご提供いただいた情報および標準的な電力使用モデルをもとに算出した概算です。',1060,yy,420,32,18,'500','#53666b')+12;
+    yy=wrapText(ctx,'実際の発電量・電気使用量・電気料金・売電収入・削減効果・投資回収期間を保証するものではありません。',1060,yy,420,32,18,'500','#53666b')+12;
+    yy=wrapText(ctx,'天候、生活パターン、料金プラン、売電条件、機器仕様・設定等により実績は変動します。',1060,yy,420,32,18,'500','#53666b')+12;
+    yy=wrapText(ctx,'正式なご提案時には、現地調査、機器仕様、設置条件、補助金の適用条件等を確認のうえ、最終見積をご案内いたします。',1060,yy,420,32,18,'500','#53666b');
+
+    roundedRect(ctx,90,935,1420,70,8,'#0b2545');
+    drawText(ctx,'株式会社OMK　｜　太陽光発電・蓄電池・エコキュート',120,980,20,'700','#ffffff');
+    canvases.push(c);
+  }
+  return canvases;
+}
+async function printProposal(){
+  calculate();
+  if(!window.jspdf || !window.jspdf.jsPDF){
+    alert('PDF生成機能の読み込みに失敗しました。通信状態を確認してページを再読み込みしてください。');
+    return;
+  }
+  const btn=document.getElementById('pdfBtn');
+  const old=btn.textContent; btn.textContent='PDF作成中…'; btn.disabled=true;
+  try{
+    const canvases=makeProposalCanvases();
+    const {jsPDF}=window.jspdf;
+    const pdf=new jsPDF({orientation:'landscape',unit:'mm',format:'a4',compress:true});
+    canvases.forEach((c,i)=>{
+      if(i>0) pdf.addPage('a4','landscape');
+      const img=c.toDataURL('image/jpeg',0.92);
+      pdf.addImage(img,'JPEG',0,0,297,210,undefined,'FAST');
+    });
+    const blob=pdf.output('blob');
+    const url=URL.createObjectURL(blob);
+    const w=window.open(url,'_blank');
+    if(!w){
+      const a=document.createElement('a');
+      a.href=url;a.download='OMK_導入効果ご提案書.pdf';document.body.appendChild(a);a.click();a.remove();
+    }
+    setTimeout(()=>URL.revokeObjectURL(url),60000);
+  }catch(e){
+    console.error(e);
+    alert('PDF生成中にエラーが発生しました。ページを再読み込みしてもう一度お試しください。');
+  }finally{
+    btn.textContent=old;btn.disabled=false;
+  }
+}
+
+function setPrototypeMode(mode){
+  document.querySelectorAll('.mode-btn').forEach(b=>b.classList.toggle('active',b.dataset.mode===mode));
+  document.getElementById('detailMode')?.classList.toggle('active',mode==='detail');
+  document.getElementById('drawingMode')?.classList.toggle('active',mode==='drawing');
+  if(mode==='simple'){
+    document.getElementById('detailMode')?.classList.remove('active');
+    document.getElementById('drawingMode')?.classList.remove('active');
+  }
+}
+function buildMonthlyRows(){
+  const body=document.getElementById('monthlyRows');
+  if(!body || body.children.length) return;
+  const months=['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+  body.innerHTML=months.map((m,i)=>`<tr>
+    <td>${m}</td>
+    <td><input class="m-buy-yen" type="number" min="0" value="0" data-month="${i}"></td>
+    <td><input class="m-buy-kwh" type="number" min="0" value="0"></td>
+    <td><input class="m-day-kwh" type="number" min="0" value="0"></td>
+    <td><input class="m-night-kwh" type="number" min="0" value="0"></td>
+    <td><input class="m-sell-yen" type="number" min="0" value="0"></td>
+    <td><input class="m-sell-kwh" type="number" min="0" value="0"></td>
+  </tr>`).join('');
+  body.querySelectorAll('input').forEach(x=>x.addEventListener('input',updateMonthlyTotals));
+}
+function sumClass(cls){
+  return [...document.querySelectorAll('.'+cls)].reduce((s,x)=>s+(Number(x.value)||0),0);
+}
+function updateMonthlyTotals(){
+  const by=sumClass('m-buy-yen'), bk=sumClass('m-buy-kwh'), sy=sumClass('m-sell-yen'), sk=sumClass('m-sell-kwh');
+  document.getElementById('detailBuyYen').textContent=Math.round(by).toLocaleString('ja-JP')+'円';
+  document.getElementById('detailBuyKwh').textContent=Math.round(bk).toLocaleString('ja-JP')+' kWh';
+  document.getElementById('detailSellYen').textContent=Math.round(sy).toLocaleString('ja-JP')+'円';
+  document.getElementById('detailSellKwh').textContent=Math.round(sk).toLocaleString('ja-JP')+' kWh';
+}
+function applyDetailedToSimple(){
+  const bills=[...document.querySelectorAll('.m-buy-yen')].map(x=>Number(x.value)||0);
+  const buyKwh=sumClass('m-buy-kwh');
+  if(bills.some(v=>v>0)){
+    const summer=[bills[5],bills[6],bills[7]].filter(v=>v>0);
+    const winter=[bills[11],bills[0],bills[1]].filter(v=>v>0);
+    if(summer.length) document.getElementById('summerBill').value=Math.round(summer.reduce((a,b)=>a+b,0)/summer.length);
+    if(winter.length) document.getElementById('winterBill').value=Math.round(winter.reduce((a,b)=>a+b,0)/winter.length);
+  }
+  const annualBuy=sumClass('m-buy-yen');
+  const base=12*(Number(document.getElementById('baseCharge')?.value)||0);
+  if(buyKwh>0 && annualBuy>base){
+    document.getElementById('buyUnit').value=((annualBuy-base)/buyKwh).toFixed(2);
+  }
+  const sellKwh=sumClass('m-sell-kwh'), sellYen=sumClass('m-sell-yen');
+  if(sellKwh>0 && sellYen>0 && document.getElementById('sellUnitExisting')){
+    document.getElementById('sellUnitExisting').value=(sellYen/sellKwh).toFixed(2);
+    document.getElementById('annualSellYen').value=Math.round(sellYen);
+  }
+  calculate();
+  const st=document.getElementById('actionStatus'); if(st) st.textContent='12か月実績を簡易シミュレーションへ反映しました';
+}
+
+function parsePanelSizeMm(){
+ const x=selectedProduct('panelMaker','panelModel',PRODUCT_MASTER.panels);
+ const s=x?.size||'';
+ const nums=(s.match(/[\d,]+/g)||[]).map(v=>Number(v.replace(/,/g,''))).filter(Number.isFinite);
+ if(nums.length>=2) return {w:nums[0],h:nums[1],source:'catalog'};
+ // 手入力時・寸法マスタなしは配置不可。勝手な寸法を仮定しない。
+ return null;
+}
+function calcLayoutVariant(roofW,roofH,setback,gap,pw,ph){
+ const usableW=Math.max(0,roofW-setback*2), usableH=Math.max(0,roofH-setback*2);
+ const cols=usableW>=pw?Math.floor((usableW+gap)/(pw+gap)):0;
+ const rows=usableH>=ph?Math.floor((usableH+gap)/(ph+gap)):0;
+ const count=cols*rows;
+ const usedW=cols?cols*pw+(cols-1)*gap:0;
+ const usedH=rows?rows*ph+(rows-1)*gap:0;
+ return {cols,rows,count,usedW,usedH,pw,ph,usableW,usableH};
+}
+let CURRENT_LAYOUT=null;
+function buildSolarLayout(){
+ const panel=parsePanelSizeMm();
+ const box=$('drawingAnalysis'), st=$('actionStatus');
+ if(!panel){
+   if(box) box.classList.remove('hidden');
+   if($('layoutPreview')) $('layoutPreview').innerHTML='<div class="compat-status warn">選択中パネルの外形寸法が製品マスタにありません。カタログ寸法が登録されたパネルを選択してください。</div>';
+   if(st) st.textContent='レイアウト作成不可：パネル寸法未登録';
+   CURRENT_LAYOUT=null; return;
+ }
+ const roofW=Math.max(0,get('layoutRoofW')), roofH=Math.max(0,get('layoutRoofH'));
+ let setback=Math.max(300,get('layoutSetback')||300);
+ if(get('layoutSetback')<300) $('layoutSetback').value=300;
+ const gap=Math.max(0,get('layoutGap'));
+ if(roofW<=setback*2||roofH<=setback*2){
+   if(box) box.classList.remove('hidden');
+   $('layoutPreview').innerHTML='<div class="compat-status warn">屋根寸法に対して300mm離隔後の有効範囲がありません。</div>';
+   CURRENT_LAYOUT=null; return;
+ }
+ const portrait=calcLayoutVariant(roofW,roofH,setback,gap,panel.w,panel.h);
+ const landscape=calcLayoutVariant(roofW,roofH,setback,gap,panel.h,panel.w);
+ const pref=$('layoutOrientation')?.value||'auto';
+ let best=pref==='portrait'?portrait:pref==='landscape'?landscape:(landscape.count>portrait.count?landscape:portrait);
+ best.orientation=(best.pw===panel.w&&best.ph===panel.h)?'縦置き':'横置き';
+ const panelWatt=get('panelW');
+ const kw=best.count*panelWatt/1000;
+ CURRENT_LAYOUT={...best,roofW,roofH,setback,gap,count:best.count,kw,panelWatt,panelModel:$('panelModel')?.value||''};
+ if(box) box.classList.remove('hidden');
+ $('layoutResultSetback').textContent=`${setback.toLocaleString('ja-JP')} mm`;
+ $('layoutResultCount').textContent=`${best.count.toLocaleString('ja-JP')} 枚`;
+ $('layoutResultKw').textContent=`${kw.toFixed(3).replace(/0+$/,'').replace(/\.$/,'')} kW`;
+ $('layoutResultOrient').textContent=best.orientation;
+ renderLayoutSvg(CURRENT_LAYOUT);
+ $('layoutNote').textContent=`屋根 ${roofW.toLocaleString('ja-JP')}×${roofH.toLocaleString('ja-JP')}mm、有効範囲 ${best.usableW.toLocaleString('ja-JP')}×${best.usableH.toLocaleString('ja-JP')}mm。屋根外周から${setback}mmを除外して配置しています。`;
+ if(st) st.textContent=`レイアウト作成完了：外周${setback}mm離隔・${best.count}枚・${kw.toFixed(2)}kW`;
+}
+function renderLayoutSvg(l){
+ const W=900,H=Math.max(420,Math.round(900*l.roofH/l.roofW));
+ const sx=W/l.roofW, sy=H/l.roofH;
+ const s=Math.min(sx,sy);
+ const drawW=l.roofW*s, drawH=l.roofH*s;
+ const ox=(W-drawW)/2, oy=(H-drawH)/2;
+ const sb=l.setback*s;
+ const startX=ox+sb+(l.usableW-l.usedW)*s/2;
+ const startY=oy+sb+(l.usableH-l.usedH)*s/2;
+ let panels='';
+ for(let r=0;r<l.rows;r++) for(let c=0;c<l.cols;c++){
+   const x=startX+c*(l.pw+l.gap)*s, y=startY+r*(l.ph+l.gap)*s;
+   panels+=`<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${(l.pw*s).toFixed(1)}" height="${(l.ph*s).toFixed(1)}" rx="1" fill="#dceaf4" stroke="#506b80" stroke-width="1"/>`;
+ }
+ const svg=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="太陽光パネル配置図">
+   <rect x="${ox}" y="${oy}" width="${drawW}" height="${drawH}" fill="#f7f8fa" stroke="#334a5d" stroke-width="2"/>
+   <rect x="${ox+sb}" y="${oy+sb}" width="${Math.max(0,drawW-2*sb)}" height="${Math.max(0,drawH-2*sb)}" fill="#fff" stroke="#b45309" stroke-width="2" stroke-dasharray="7 5"/>
+   ${panels}
+   <text x="${ox+8}" y="${oy+18}" font-size="12" fill="#334a5d">屋根 ${l.roofW}×${l.roofH}mm</text>
+   <text x="${ox+8}" y="${oy+36}" font-size="12" fill="#9a5a07">外周離隔 ${l.setback}mm</text>
+   <text x="${ox+8}" y="${oy+54}" font-size="12" fill="#334a5d">${l.panelModel} / ${l.count}枚 / ${l.kw.toFixed(2)}kW</text>
+ </svg>`;
+ $('layoutPreview').innerHTML=svg;
+}
+function adoptCalculatedLayout(){
+ if(!CURRENT_LAYOUT){buildSolarLayout(); if(!CURRENT_LAYOUT)return;}
+ $('panelCount').value=CURRENT_LAYOUT.count;
+ $('solarKw').value=CURRENT_LAYOUT.kw.toFixed(3).replace(/0+$/,'').replace(/\.$/,'');
+ updatePcsDesign(false); renderPcsCandidates(); calculate();
+ setPrototypeMode('simple');
+ const st=$('actionStatus'); if(st) st.textContent=`レイアウト採用：${CURRENT_LAYOUT.count}枚 / ${CURRENT_LAYOUT.kw.toFixed(2)}kW / 外周${CURRENT_LAYOUT.setback}mm離隔`;
+}
+function updateCombinedPcs(){
+ const main=get('pcsTotalKw'), ext=get('externalPcsKw');
+ if($('combinedPcsKw')) $('combinedPcsKw').value=(main+ext).toFixed(2);
+}
+
+
+window.addEventListener('DOMContentLoaded',()=>{
+  const st=document.getElementById('jsStatus'); if(st) st.textContent='JavaScript動作中';
+  buildMonthlyRows();
+  initProductMaster();
+  $('panelMaker')?.addEventListener('change',()=>{fillModelSelect('panelMaker','panelModel',PRODUCT_MASTER.panels);updatePanelProduct();});
+  $('panelModel')?.addEventListener('change',()=>{const x=selectedProduct('panelMaker','panelModel',PRODUCT_MASTER.panels); if(x?.w)$('panelW').value=x.w; updatePanelProduct();});
+  $('panelW')?.addEventListener('input',()=>updateSolarCapacity());
+  $('panelCount')?.addEventListener('input',()=>updateSolarCapacity());
+  ['layoutRoofW','layoutRoofH','layoutSetback','layoutGap'].forEach(id=>$(id)?.addEventListener('input',()=>{if(!$('drawingAnalysis')?.classList.contains('hidden'))buildSolarLayout();}));
+  $('layoutOrientation')?.addEventListener('change',()=>{if(!$('drawingAnalysis')?.classList.contains('hidden'))buildSolarLayout();});
+  $('solarKw')?.addEventListener('input',()=>updatePcsDesign());
+  $('existKw')?.addEventListener('input',()=>{updatePcsDesign();renderPcsCandidates();});
+  $('existKw')?.addEventListener('input',()=>updatePcsDesign());
+  $('pcsMaker')?.addEventListener('change',()=>{fillModelSelect('pcsMaker','pcsModel',PRODUCT_MASTER.pcs);updatePcsProduct();});
+  $('pcsModel')?.addEventListener('change',()=>{const x=selectedProduct('pcsMaker','pcsModel',PRODUCT_MASTER.pcs); if(x?.kw)$('pcsUnitKw').value=x.kw; updatePcsProduct();});
+  $('pcsUnitKw')?.addEventListener('input',()=>updatePcsDesign());
+  $('pcsCount')?.addEventListener('input',()=>updatePcsDesign());
+  $('externalPcsKw')?.addEventListener('input',()=>{updateCombinedPcs();calculate();});
+  $('batteryMaker')?.addEventListener('change',()=>{fillModelSelectFromItems(compatibleBatteryList());updateBatteryProduct();});
+  $('batteryModel')?.addEventListener('change',()=>updateBatteryProduct());
+  $('refreshDesignBtn')?.addEventListener('click',()=>renderPcsCandidates());
+  document.querySelectorAll('.mode-btn').forEach(b=>b.addEventListener('click',()=>setPrototypeMode(b.dataset.mode)));
+  document.getElementById('applyDetailBtn')?.addEventListener('click',applyDetailedToSimple);
+  document.getElementById('analyzeDrawingBtn')?.addEventListener('click',buildSolarLayout);
+  document.getElementById('adoptLayoutBtn')?.addEventListener('click',adoptCalculatedLayout);
+  document.querySelectorAll('input[name=pattern]').forEach(x=>x.addEventListener('change',()=>{updateBoxes();updatePcsDesign(false);calculate();}));
+  ['industrialAnnualUse','industrialDayShare','industrialAnnualBill','industrialDays','industrialUseType'].forEach(id=>{const el=$(id);if(el)el.addEventListener('input',calculate);});
+  document.getElementById('useDegrade').addEventListener('change',e=>{document.getElementById('degrade').disabled=!e.target.checked; calculate();});
+
+  const bindTap=(id,fn)=>{
+    const el=$(id);
+    if(!el) return;
+    el.onclick=function(e){ e.preventDefault(); fn(); };
+  };
+  bindTap('calcBtn',calculate);
+  bindTap('pdfBtn',printProposal);
+  bindTap('resetBtn',resetForm);
+
+  updateBoxes();
+  updateCombinedPcs();
+  calculate();
+});
+</script>
+</body>
+</html>
